@@ -1,0 +1,28 @@
+---
+layout: default
+---
+
+<div class="home">
+  {%- if page.title -%}
+    <h1 class="page-heading">{{ page.title }}</h1>
+  {%- endif -%}
+
+  {{ content }}
+
+  {%- if site.about_me_topics.size > 0 -%}
+    <!-- <h2 class="post-list-heading">{{ page.list_title | default: "Posts" }}</h2> -->
+    <ul class="post-list">
+      {%- for post in site.about_me_topics -%}
+      <li>
+        <div class="image-wrapper">
+            <img src="{{ post.image }}"></img>
+        </div>
+        <h1>
+            {{ post.title }}
+        </h1>
+      </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+</div>
