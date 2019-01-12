@@ -1,0 +1,10 @@
+---
+layout: post
+title: Progress on Recursion Looper Live
+date: 2010-07-09 20:54:12
+categories: 
+permalink: /:year/:month/:day/:title/
+---
+<p><strong>Recursion Looper Live</strong></p>
+<p><span style="text-decoration: underline;">Overview</span> Recursion Looper Live(RLL) is meant to be a more immediate performance oriented looper.&nbsp; There are 4 total loops that allow for 4 separate song sections.&nbsp; Each loop is tempo independent and when one loop is playing, the others are stopped.&nbsp; An overall latching&nbsp;mute to allow for additional&nbsp;musical fills and unlimited overdub for each loop are provided.&nbsp; RLL is meant to be controlled using a pedalboard with 6 buttons(can be custom midi mapped or assigned to keyboard presses) and computer keypresses mapped for easy control during live performance.&nbsp; Since each loop can be armed for overwrite, an entire live set can be performed with only one patch, with no need to reopen any files.</p>
+<p><span style="text-decoration: underline;">Reason for a Second Version</span> After using it for a while, the standard recursion Looper began to feel a little bulky to use.&nbsp; Everything had to start out synced to a click track, and while the A and B sections and features helped make interesting&nbsp;songs, there was still a lot of repeating and time wasted while adding in extra layers to the loops.&nbsp; Recursion Looper Live hopefully solves many of these problems.</p>

@@ -1,0 +1,12 @@
+---
+layout: post
+title: Pro Tools for Live Performance
+date: 2010-12-17 18:16:11
+categories: 
+permalink: /:year/:month/:day/:title/
+---
+<p>The new version of Avid's (I still always say Digidesign and have to correct myself) Pro Tools, Pro Tools 9, just came out. &nbsp;I just bought and downloaded my upgrade version. &nbsp;There are a lot of new improvements that I've been wanting to try out, specifically OMF import and some of the enhanced video features. &nbsp;However, my first chance &nbsp;to use it was a little unconventional compared to how I typically use pro tools.</p>
+<p>In the worship band at my church, I usually end up playing a Yamaha grand piano with a Korg triton on top. &nbsp;I use a lot of pads, strings, organ mixed with the piano sounds. &nbsp;For a recent night worship &nbsp;service with a different stage setup, we ended up moving the piano offstage. &nbsp;The piano patches on my triton or any of the other keyboards we have around are pretty bad. &nbsp;The best sounding piano I have is the one from Avid's Mini Grand RTAS plugin that comes with PT. &nbsp;So I decided to find a way to use PT to run some virtual instrument sounds live.</p>
+<!--more-->
+<p>After some trial and error, The easiest way I discovered was to create a separate midi track for each sound you plan on using, then create an audio track with the instances of the virtual instruments. &nbsp; You can control which input MIDI interface and channel belongs to each MIDI track and which virtual instrument the sound is routed to in the I/O section. &nbsp;After doing this, arm all MIDI tracks while holding shift to select them all. &nbsp;Then just assign some MIDI CC controls for volume, cutoff frequency, leslie speed, ect. by using the MIDI learn function(right click). &nbsp;After this you should be ready to play, and changing MIDI channels on your controller keyboards lets you change sounds.</p>
+<p>A nice feature on my Digi 003 audio interface also gave me a solid backup. &nbsp;The two keyboard I used as controllers both had synths inside, but I obviously preferred to use the nicer sounding and more flexible soft synths. &nbsp;The Aux in on the 003 lets me run my two keyboard audio outputs into the interface. &nbsp;If the computer were to crash or have software troubles, all I have to do is hit the hardware Aux In button and I'm using the keyboard built in sounds and the performance can go on, albeit with not as nice sounding samples, but it's much better than silence!</p>

@@ -1,0 +1,12 @@
+---
+layout: post
+title: Beep It
+date: 2009-04-27 18:36:47
+categories: 
+permalink: /:year/:month/:day/:title/
+---
+<p><strong><em>DIY Optical Theremin</em></strong></p>
+<p><a href="/uploads/2010/07/beepit.jpg"><img class="alignnone size-medium wp-image-69" title="beepit" src="/uploads/2010/07/beepit.jpg?w=300" alt="" width="358" height="267" /></a></p>
+<p>This is a pretty simple projet for anyone who has a little bit of electronics experience.&nbsp; I used a circuit designed by Michael Una, Check out his website where you can look at his schematic and&nbsp;buy premade Beep Its here: <a href="http://una-love.com/munablog/category/beep-it/">http://una-love.com/munablog/category/beep-it/</a></p>
+<p><iframe src="https://www.youtube.com/embed/mzQzGms_JNw?rel=0" frameborder="0" width="420" height="315"></iframe>&nbsp;</p>
+<p>I built mine for about $20 in parts from Radio Shack.&nbsp; Although the parts could probably be attained cheaper through the internet, I'm impatient and don't like to wait for shipping.&nbsp; It took only a few hours to assemble.&nbsp; I laid it all out on a breadboard to ensure it worked right, then started moving the pieces into a permanant enclosure.&nbsp; Instead of a petri dish, like Michael used, I mounted my beep it inside an empty 25 CD container, that blank discs usally come in, it opens easily for modification or battery changes, and stays locked pretty well too. </p>

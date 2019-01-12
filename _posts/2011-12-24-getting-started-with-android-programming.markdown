@@ -1,0 +1,12 @@
+---
+layout: post
+title: Getting Started with Android Programming
+date: 2011-12-24 16:15:55
+categories: 
+permalink: /:year/:month/:day/:title/
+---
+<p>I'm finally finding out what all this Android stuff is about. &nbsp;After two years of using an iPhone, I just picked up a Samsung Galaxy S II. &nbsp;One of the things I was most excited bout when switching was learning to program for Android. &nbsp;I had played around with some tutorials and basic apps using objective-C in Xcode, but the real barrier was the $100 buy in to become an Apple&nbsp;Developer and put those programs on my device. &nbsp;I'm happy to report that for Android, the process is much more simple and best of all: Free!</p>
+<p><a href="/uploads/2011/12/SC20111224-144447.png"><img class="alignnone size-medium wp-image-643" title="SC20111224-144447" src="/uploads/2011/12/SC20111224-144447-180x300.png" alt="" width="180" height="300" /></a></p>
+<!--more-->
+<p>The best way to start is by following the instructions available here:&nbsp;<a href="http://developer.android.com/sdk/installing.html">http://developer.android.com/sdk/installing.html</a>&nbsp;. &nbsp;The whole process was pretty straightforward and I only had trouble when installing the Eclipse ADT plugin. &nbsp;The issue was a URL in the software sources for Eclipse had the name of the old version instead of the newest (Indigo, 3.7). &nbsp;Renaming the URL solved the problem and the few other minor errors were easily solved using Google. The obvious first task when programming for a new language or device is to get a "hello world" of some kind running. &nbsp;Google is very helpful in this respect and have a great into to starting a project and how Android apps generally work:&nbsp;<a href="http://developer.android.com/resources/tutorials/hello-world.html">http://developer.android.com/resources/tutorials/hello-world.html</a>. &nbsp;</p>
+<p>The program was easily tested in a AVD (Android Vitrual Device). The key difference between my experiments in iOS and Android programming is how easy it was to move this simple program right onto my device. &nbsp;Google provides very straightforward instructions that worked on the first try:&nbsp;<a href="http://developer.android.com/guide/developing/device.html#setting-up">http://developer.android.com/guide/developing/device.html#setting-up</a> I hope these links helped anybody just getting starting with Android programming. &nbsp;Have Fun!</p>

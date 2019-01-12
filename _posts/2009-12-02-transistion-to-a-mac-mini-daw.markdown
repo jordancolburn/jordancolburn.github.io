@@ -1,0 +1,10 @@
+---
+layout: post
+title: Transistion to a Mac Mini DAW
+date: 2009-12-02 14:43:00
+categories: 
+permalink: /:year/:month/:day/:title/
+---
+<p><a href="http://upload.wikimedia.org/wikipedia/commons/7/7b/Mac_mini_Intel_Core_transparent.png"><img style="border-style: initial; border-color: initial; border-width: 0px;" src="http://upload.wikimedia.org/wikipedia/commons/7/7b/Mac_mini_Intel_Core_transparent.png" alt="" width="358" height="259" border="0" /></a></p>
+<p>I did it.....I finally sold my soul to Steve Jobs. In the past few months I got both an iPhone, and a Mac Mini! While I&rsquo;m still trying to figure out how I can live with myself, I thought I would at least write some of my observations about switching from Windows XP to OSX for my main computer DAW. I got the 2.0 GHz core 2 duo Mac Mini for $440 off of craigslist with a keyboard, mouse, Office for Mac, and all the original boxes. I&rsquo;ve already upgraded the 5,400 rpm hard drive to a higher speed 7,200 rpm, 500 GB drive.</p>
+<p>The next update will be to add a 2 gig stick of ram to the 1 gig already installed. The performance of the computer is pretty good, but could be better at multitasking (more ram should help here). I really like OS X so far. It&rsquo;s kind of like switching from driving a budget Kia to a nicer BMW. Both get the job done, but the BMW is much more polished. I would prefer to see more of what goes on under the hood though, I&rsquo;m still used to selecting where programs install, having more control of uninstall, and generally a better idea of what is going on with my computer. Almost all programs and drivers (do you call them this in OS X?) installed quickly, easily and without issues. The only real problems I had were trying to install SampleTank LE. Apparently LE is so old that it doesn&rsquo;t support Intel Macs, just the PPC versions. I&rsquo;m going to take that as a hint to buy some new software! All in all, now that everything is finally setup, the Mac boots quickly, runs quietly, and allows me to just make music.</p>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Python Script for RAW Timelapses with Ken Burns style panning | Jordan Colburn</title>
+<meta name="generator" content="Jekyll v3.7.4" />
+<meta property="og:title" content="Python Script for RAW Timelapses with Ken Burns style panning" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Since installing magic lantern&nbsp;on my Canon t3i, I&#39;ve been very interested in starting to learn to create timelapses. &nbsp;I&#39;m specifically impressed with timelapses with ken burns effect styled motion like this one from Philip Bloom:&nbsp;http://philipbloom.net/film/24-hours-of-neon/ The only downside is, I didn&#39;t have all the software tools to make it work. &nbsp;To solve this, I wrote my own python script to automate the timelapse process and provide a GUI to select unlimited keyframes for ken burns style motion. &nbsp;My first test can be seen below. The script, builds upon the RAW deflickr script written by a1ex from the Magic Lantern project Current Dependencies: (can all be installed on most versions of GNU/Linux with apt-get) *Timelapse ffmpeg* python yasm x264 imagemagick ffmpeg *Deflicker* numpy scipy matplotlib dcraw ufraw imagemagick *GUI* PIL to start it use the command line format: python timelapse.py -i raw -o jpg -r Where timelapse.py is the script, raw is the input folder containing canon raw files, and jpg is the destination folder for converted jpg and movie. The -r switch designates that the files in raw will be developed, leave this out if you already have converted files in the jpg directory. The script is a little rough around the edges, but it works well enough for me. Comment if you have any improvements&nbsp;or questions. from __future__ import division import os import glob import sys, re, time, datetime, subprocess, shlex, getopt, fnmatch from math import * from pylab import * import Tkinter import ttk import tkMessageBox from PIL import Image, ImageTk # RAW deflickering script # Copyright (2012) a1ex. License: GPL. def progress(x, interval=1): global _progress_first_time, _progress_last_time, _progress_message, _progress_interval try: p = float(x) init = False except: init = True if init: _progress_message = x _progress_last_time = time.time() _progress_first_time = time.time() _progress_interval = interval elif x: if time.time() - _progress_last_time &gt; _progress_interval: print &gt;&gt; sys.stderr, &quot;%s [%d%% done, ETA %s]...&quot; % (_progress_message, int(100*p), datetime.timedelta(seconds = round((1-p)/p*(time.time()-_progress_first_time)))) _progress_last_time = time.time() def change_ext(file, newext): if newext and (not newext.startswith(&quot;.&quot;)): newext = &quot;.&quot; + newext return os.path.splitext(file)[0] + newext def get_median(file): cmd1 = &quot;dcraw -c -D -4 -o 0 &#39;%s&#39;&quot; % file cmd2 = &quot;convert - -type Grayscale -scale 500x500 -format %c histogram:info:-&quot; #~ print cmd1, &quot;|&quot;, cmd2 p1 = subprocess.Popen(shlex.split(cmd1), stdout=subprocess.PIPE) p2 = subprocess.Popen(shlex.split(cmd2), stdin=p1.stdout, stdout=subprocess.PIPE) lines = p2.communicate()[0].split(&quot;\n&quot;) X = [] for l in lines[1:]: p1 = l.find(&quot;(&quot;) if p1 &gt; 0: p2 = l.find(&quot;,&quot;, p1) level = int(l[p1+1:p2]) count = int(l[:p1-2]) X += [level]*count m = median(X) return m def deflickerRAW(inputfolder, outputfolder): ion() progress(&quot;Analyzing RAW exposures...&quot;); files = sorted(os.listdir(inputfolder)) i = 0; M = []; for k,f in enumerate(files): m = get_median(os.path.join(inputfolder, f)) M.append(m); E = [-log2(m/M[0]) for m in M] E = detrend(array(E)) cla(); stem(range(1,len(E)+1), E); xlabel(&#39;Image number&#39;) ylabel(&#39;Exposure correction (EV)&#39;) title(f) draw(); progress(k / len(files)) if not os.path.exists(outputfolder): os.makedirs(outputfolder) progress(&quot;Developing JPG images...&quot;); i = 0; for k,f in enumerate(files): ec = 2 + E[k]; cmd = &quot;ufraw-batch --out-type=jpg --overwrite --clip=film --saturation=2 --exposure=%s &#39;%s&#39; --output=&#39;%s/%s&#39;&quot; % (ec, os.path.join(inputfolder, f),outputfolder, change_ext(f, &quot;.jpg&quot;)) os.system(cmd) progress(k / len(files)) #declare variables############ moving=False resize=False aspectx=16 aspecty=9 rectcenterx=0 rectcentery=0 rectsizex=0 rectsizey=0 imagesizexpre=0 imagesizeypre=0 imagesizex=0 imagesizey=0 #Events######################### #triggers on left click in canvas def xy(event): global rectcenterx, rectcentery, rectsizex, rectsizey, moving, resize #if moving or resize: moving=False resize=False #detect rectangle center grab for move if event.x&gt;(rectcenterx-int(rectsizex/2)) and event.x&lt;(rectcenterx+int(rectsizex/2)) and event.y&lt;(int(rectcentery+rectsizey/2)) and event.y&gt;(int(rectcentery-rectsizey/2)): moving=True #detect lower right rectangle corner grabs for resize if event.x&gt;(rectcenterx+rectsizex-rectsizex/4) and event.x&lt;(rectcenterx+rectsizex+rectsizex/4) and event.y&lt;(rectcentery+rectsizey+rectsizey/4) and event.y&gt;(rectcentery+rectsizey-rectsizey/4): resize=True #triggers on motion in canvas def canvasmotion(event, canvas, rectangle): global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,checkboxstate if checkboxstate.get(): if moving: if ((event.x+rectsizex&lt;imagesizex) and (event.x-rectsizex&gt;0)): rectcenterx=event.x if ((event.y+rectsizey&lt;imagesizey) and (event.y-rectsizey&gt;0)): rectcentery=event.y if resize: if (event.x&lt;=imagesizex) and (event.x-(2*(event.x-rectcenterx))&gt;=0) and (rectcentery-((event.x-rectcenterx)*aspecty/aspectx))&gt;0 and int((event.x-rectcenterx)*2*imagesizexpre/imagesizex)&gt;=1920: rectsizex=event.x-rectcenterx rectsizey=(rectsizex*aspecty)/aspectx drawRect(canvas,rectangle) def drawRect(canvas, rectangle): global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,keyframes,currentframe canvas.tag_raise(rectangle) canvas.coords(rectangle, rectcenterx-rectsizex, rectcentery-rectsizey, rectcenterx+rectsizex, rectcentery+rectsizey) keyframes[currentframe]=[rectsizex,rectsizey,rectcenterx,rectcentery] def changeFrame(FrameNumSpin, outputfolder, canvas, canvasimage, rectangle,c1): global rectcenterx,rectcentery,rectsizex,rectsizey,photo,currentframe,checkboxstate currentframe = int(FrameNumSpin.get()) files = sorted(glob.glob(outputfolder + &quot;/IMG_*.jpg&quot;)) image = Image.open(files[currentframe-1]) image.thumbnail((350, 350), Image.ANTIALIAS) photo = ImageTk.PhotoImage(image) canvas.delete(canvasimage) canvasimage = canvas.create_image(0,0, image=photo, anchor=Tkinter.NW) c1.deselect() for keyframe in keyframes: if keyframe==currentframe: c1.select() rectsizex=keyframes[currentframe][0] rectsizey=keyframes[currentframe][1] rectcenterx=keyframes[currentframe][2] rectcentery=keyframes[currentframe][3] drawRect(canvas, rectangle) break def checkboxClicked(canvas,rectangle,c1): global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,imagesizex,imagesizey,imagesizexpre,imagesizeypre, photo, keyframes,currentframe,checkboxstate if currentframe == 1: c1.select() else: if checkboxstate.get(): rectsizex=imagesizex/2 rectsizey=(rectsizex*9)/16 rectcenterx=imagesizex/2 rectcentery=imagesizey/2 #keyframes[currentframe]=[rectsizex,rectsizey,rectcenterx,rectcentery] drawRect(canvas,rectangle) else: del keyframes[currentframe] print &quot;deleted keyframe&quot; canvas.tag_lower(rectangle) &#39;&#39;&#39; #graceful exit def ask_quit(root): if tkMessageBox.askokcancel(&quot;Quit&quot;, &quot;Do you want to quit now?&quot;): root.destroy() &#39;&#39;&#39; def initGUI(inputfolder, outputfolder): # global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,imagesizex,imagesizey,imagesizexpre,imagesizeypre, photo, keyframes,currentframe,checkboxstate #Create User Interface # root = Tkinter.Tk() #root.columnconfigure(0, weight=1) #root.rowconfigure(0, weight=1) canvas = Tkinter.Canvas(root) files = sorted(glob.glob(outputfolder + &quot;/IMG_*.jpg&quot;)) #add image to canvas image = Image.open(files[0]) imagesizexpre = image.size[0] imagesizeypre = image.size[1] image.thumbnail((350, 350), Image.ANTIALIAS) imagesizex = image.size[0] imagesizey = image.size[1] #set initial rect size rectsizex=imagesizex/2 rectsizey=(rectsizex*9)/16 rectcenterx=imagesizex/2 rectcentery=imagesizey/2 currentframe=1 keyframes={1:[rectsizex,rectsizey,rectcenterx,rectcentery]} photo = ImageTk.PhotoImage(image) canvasimage = canvas.create_image(0,0, image=photo, anchor=Tkinter.NW) rectangle=canvas.create_rectangle(rectcenterx-rectsizex, rectcentery-rectsizey, rectcenterx+rectsizex, rectcentery+rectsizey, outline=&quot;#fb0&quot;) #generate header button row HeaderRow = Tkinter.Frame(root) b1 = Tkinter.Button(HeaderRow, text=&quot;One&quot;) b2 = Tkinter.Button(HeaderRow, text=&quot;Two&quot;) checkboxstate=Tkinter.IntVar() c1 = Tkinter.Checkbutton(HeaderRow, text=&quot;Keyframe&quot;, variable=checkboxstate, command=lambda: checkboxClicked(canvas,rectangle,c1)) headerLabel1 = Tkinter.Label(HeaderRow, text=&quot;frame #&quot;) headerLabel2 = Tkinter.Label(HeaderRow, text=&quot;of %d&quot; % len(files)) FrameNumSpin = Tkinter.Spinbox(HeaderRow, from_=1, to_=len(files), command=lambda: changeFrame(FrameNumSpin, outputfolder,canvas,canvasimage,rectangle,c1)) b1.pack(side = Tkinter.LEFT) b2.pack(side = Tkinter.LEFT) c1.pack(side = Tkinter.LEFT) headerLabel1.pack(side = Tkinter.LEFT) FrameNumSpin.pack(side = Tkinter.LEFT) headerLabel2.pack(side = Tkinter.LEFT) HeaderRow.grid(column=0, row=0) c1.select() #create canvas canvas.grid(column=0, row=1, sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S)) canvas.bind(&quot;&quot;, xy) canvas.bind(&quot;&quot;, lambda event: canvasmotion(event, canvas, rectangle)) #generate foot button row FooterRow = Tkinter.Frame(root) footerLabel = Tkinter.Label(FooterRow, text=&quot;Useful help tips&quot;) b3 = Tkinter.Button(FooterRow, text=&quot;Three&quot;) b4 = Tkinter.Button(FooterRow,text=&quot;Process!&quot;, command=lambda: processTimelapse(imagesizex,imagesizey,imagesizexpre,imagesizeypre,inputfolder,outputfolder)) footerLabel.pack(side = Tkinter.LEFT) b3.pack(side = Tkinter.LEFT) b4.pack(side = Tkinter.LEFT) FooterRow.grid(column=0, row=3) #root.protocol(&quot;WM_DELETE_WINDOW&quot;, ask_quit()) root.title (&quot;Timelapse&quot;) #w,h = root.winfo_screenwidth(), root.winfo_screenheight() #root.geometry(&quot;%dx%d+0+0&quot; % (w,h)) root.mainloop() def processTimelapse(imagesizex,imagesizey,imagesizexpre,imagesizeypre,inputfolder,outputfolder): global rectcenterx,rectcentery,rectsizex,rectsizey,aspectx,aspecty,keyframes #renumberjpeg(inputfolder,outputfolder) i=0 files = sorted(glob.glob(outputfolder + &quot;/IMG_*.jpg&quot;)) if not os.path.exists(outputfolder+&quot;/resized&quot;): os.makedirs(outputfolder+&quot;/resized&quot;) for onefile in files: if fnmatch.fnmatch(onefile, &#39;*.jpg&#39;): print &quot;cropping %s&quot; % onefile filename=onefile image = Image.open(filename) for keyframe in sorted(keyframes): if keyframe==i+1: print &quot;equals&quot; rectsizex=keyframes[i+1][0] rectsizey=keyframes[i+1][1] rectcenterx=keyframes[i+1][2] rectcentery=keyframes[i+1][3] interpolatelatch=0 rectsizexslice=0 rectsizeyslice=0 rectcenterxslice=0 rectcenteryslice=0 break elif keyframe&gt;(i+1): print &quot;greaterthan&quot; if interpolatelatch==0: rectsizexslice=(keyframes[keyframe][0]-rectsizex)/(keyframe-(i)) rectsizeyslice=(keyframes[keyframe][1]-rectsizey)/(keyframe-(i)) rectcenterxslice=(keyframes[keyframe][2]-rectcenterx)/(keyframe-(i)) rectcenteryslice=(keyframes[keyframe][3]-rectcentery)/(keyframe-(i)) interpolatelatch=1 rectsizex=rectsizex+rectsizexslice rectsizey=rectsizey+rectsizeyslice rectcenterx=rectcenterx+rectcenterxslice rectcentery=rectcentery+rectcenteryslice break box = (int((rectcenterx-rectsizex)*imagesizexpre/imagesizex), int((rectcentery-rectsizey)*imagesizeypre/imagesizey), int((rectcenterx+rectsizex)*imagesizexpre/imagesizex), int((rectcentery+rectsizey)*imagesizeypre/imagesizey)) print box area = image.crop(box) area = area.resize((1920, 1080), Image.ANTIALIAS) area.save(outputfolder+&quot;/resized/%03d.jpg&quot; % i, &#39;jpeg&#39;) i=i+1 cmd = &quot;avconv -i %s/resized/&quot; % outputfolder cmd= cmd + &quot;%&quot; + &quot;03d.jpg -r 24 -s hd1080 -vcodec libx264 -crf 16 %s/timelapse.mp4&quot; % outputfolder os.system(cmd) def main(argv): # print command line arguments inputfolder = &#39;&#39; outputfolder = &#39;&#39; process = 0 try: opts, args = getopt.getopt(argv,&quot;hi:o:r&quot;,[&quot;ifolder=&quot;,&quot;ofolder=&quot;]) except getopt.GetoptError: print &#39;timelapse.py -i -o -r &#39; sys.exit(2) for opt, arg in opts: if opt == &#39;-h&#39;: print &#39;timelapse.py -i -o -r &#39; sys.exit() elif opt in (&quot;-i&quot;, &quot;--ifolder&quot;): inputfolder = arg elif opt in (&quot;-o&quot;, &quot;--ofolder&quot;): outputfolder = arg elif opt == &quot;-r&quot;: process = 1 print &#39;Input folder is &quot;&#39;, inputfolder print &#39;Output folder is &quot;&#39;, outputfolder if process==1: deflickerRAW(inputfolder, outputfolder) initGUI(inputfolder, outputfolder) if __name__ == &quot;__main__&quot;: main(sys.argv[1:])" />
+<meta property="og:description" content="Since installing magic lantern&nbsp;on my Canon t3i, I&#39;ve been very interested in starting to learn to create timelapses. &nbsp;I&#39;m specifically impressed with timelapses with ken burns effect styled motion like this one from Philip Bloom:&nbsp;http://philipbloom.net/film/24-hours-of-neon/ The only downside is, I didn&#39;t have all the software tools to make it work. &nbsp;To solve this, I wrote my own python script to automate the timelapse process and provide a GUI to select unlimited keyframes for ken burns style motion. &nbsp;My first test can be seen below. The script, builds upon the RAW deflickr script written by a1ex from the Magic Lantern project Current Dependencies: (can all be installed on most versions of GNU/Linux with apt-get) *Timelapse ffmpeg* python yasm x264 imagemagick ffmpeg *Deflicker* numpy scipy matplotlib dcraw ufraw imagemagick *GUI* PIL to start it use the command line format: python timelapse.py -i raw -o jpg -r Where timelapse.py is the script, raw is the input folder containing canon raw files, and jpg is the destination folder for converted jpg and movie. The -r switch designates that the files in raw will be developed, leave this out if you already have converted files in the jpg directory. The script is a little rough around the edges, but it works well enough for me. Comment if you have any improvements&nbsp;or questions. from __future__ import division import os import glob import sys, re, time, datetime, subprocess, shlex, getopt, fnmatch from math import * from pylab import * import Tkinter import ttk import tkMessageBox from PIL import Image, ImageTk # RAW deflickering script # Copyright (2012) a1ex. License: GPL. def progress(x, interval=1): global _progress_first_time, _progress_last_time, _progress_message, _progress_interval try: p = float(x) init = False except: init = True if init: _progress_message = x _progress_last_time = time.time() _progress_first_time = time.time() _progress_interval = interval elif x: if time.time() - _progress_last_time &gt; _progress_interval: print &gt;&gt; sys.stderr, &quot;%s [%d%% done, ETA %s]...&quot; % (_progress_message, int(100*p), datetime.timedelta(seconds = round((1-p)/p*(time.time()-_progress_first_time)))) _progress_last_time = time.time() def change_ext(file, newext): if newext and (not newext.startswith(&quot;.&quot;)): newext = &quot;.&quot; + newext return os.path.splitext(file)[0] + newext def get_median(file): cmd1 = &quot;dcraw -c -D -4 -o 0 &#39;%s&#39;&quot; % file cmd2 = &quot;convert - -type Grayscale -scale 500x500 -format %c histogram:info:-&quot; #~ print cmd1, &quot;|&quot;, cmd2 p1 = subprocess.Popen(shlex.split(cmd1), stdout=subprocess.PIPE) p2 = subprocess.Popen(shlex.split(cmd2), stdin=p1.stdout, stdout=subprocess.PIPE) lines = p2.communicate()[0].split(&quot;\n&quot;) X = [] for l in lines[1:]: p1 = l.find(&quot;(&quot;) if p1 &gt; 0: p2 = l.find(&quot;,&quot;, p1) level = int(l[p1+1:p2]) count = int(l[:p1-2]) X += [level]*count m = median(X) return m def deflickerRAW(inputfolder, outputfolder): ion() progress(&quot;Analyzing RAW exposures...&quot;); files = sorted(os.listdir(inputfolder)) i = 0; M = []; for k,f in enumerate(files): m = get_median(os.path.join(inputfolder, f)) M.append(m); E = [-log2(m/M[0]) for m in M] E = detrend(array(E)) cla(); stem(range(1,len(E)+1), E); xlabel(&#39;Image number&#39;) ylabel(&#39;Exposure correction (EV)&#39;) title(f) draw(); progress(k / len(files)) if not os.path.exists(outputfolder): os.makedirs(outputfolder) progress(&quot;Developing JPG images...&quot;); i = 0; for k,f in enumerate(files): ec = 2 + E[k]; cmd = &quot;ufraw-batch --out-type=jpg --overwrite --clip=film --saturation=2 --exposure=%s &#39;%s&#39; --output=&#39;%s/%s&#39;&quot; % (ec, os.path.join(inputfolder, f),outputfolder, change_ext(f, &quot;.jpg&quot;)) os.system(cmd) progress(k / len(files)) #declare variables############ moving=False resize=False aspectx=16 aspecty=9 rectcenterx=0 rectcentery=0 rectsizex=0 rectsizey=0 imagesizexpre=0 imagesizeypre=0 imagesizex=0 imagesizey=0 #Events######################### #triggers on left click in canvas def xy(event): global rectcenterx, rectcentery, rectsizex, rectsizey, moving, resize #if moving or resize: moving=False resize=False #detect rectangle center grab for move if event.x&gt;(rectcenterx-int(rectsizex/2)) and event.x&lt;(rectcenterx+int(rectsizex/2)) and event.y&lt;(int(rectcentery+rectsizey/2)) and event.y&gt;(int(rectcentery-rectsizey/2)): moving=True #detect lower right rectangle corner grabs for resize if event.x&gt;(rectcenterx+rectsizex-rectsizex/4) and event.x&lt;(rectcenterx+rectsizex+rectsizex/4) and event.y&lt;(rectcentery+rectsizey+rectsizey/4) and event.y&gt;(rectcentery+rectsizey-rectsizey/4): resize=True #triggers on motion in canvas def canvasmotion(event, canvas, rectangle): global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,checkboxstate if checkboxstate.get(): if moving: if ((event.x+rectsizex&lt;imagesizex) and (event.x-rectsizex&gt;0)): rectcenterx=event.x if ((event.y+rectsizey&lt;imagesizey) and (event.y-rectsizey&gt;0)): rectcentery=event.y if resize: if (event.x&lt;=imagesizex) and (event.x-(2*(event.x-rectcenterx))&gt;=0) and (rectcentery-((event.x-rectcenterx)*aspecty/aspectx))&gt;0 and int((event.x-rectcenterx)*2*imagesizexpre/imagesizex)&gt;=1920: rectsizex=event.x-rectcenterx rectsizey=(rectsizex*aspecty)/aspectx drawRect(canvas,rectangle) def drawRect(canvas, rectangle): global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,keyframes,currentframe canvas.tag_raise(rectangle) canvas.coords(rectangle, rectcenterx-rectsizex, rectcentery-rectsizey, rectcenterx+rectsizex, rectcentery+rectsizey) keyframes[currentframe]=[rectsizex,rectsizey,rectcenterx,rectcentery] def changeFrame(FrameNumSpin, outputfolder, canvas, canvasimage, rectangle,c1): global rectcenterx,rectcentery,rectsizex,rectsizey,photo,currentframe,checkboxstate currentframe = int(FrameNumSpin.get()) files = sorted(glob.glob(outputfolder + &quot;/IMG_*.jpg&quot;)) image = Image.open(files[currentframe-1]) image.thumbnail((350, 350), Image.ANTIALIAS) photo = ImageTk.PhotoImage(image) canvas.delete(canvasimage) canvasimage = canvas.create_image(0,0, image=photo, anchor=Tkinter.NW) c1.deselect() for keyframe in keyframes: if keyframe==currentframe: c1.select() rectsizex=keyframes[currentframe][0] rectsizey=keyframes[currentframe][1] rectcenterx=keyframes[currentframe][2] rectcentery=keyframes[currentframe][3] drawRect(canvas, rectangle) break def checkboxClicked(canvas,rectangle,c1): global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,imagesizex,imagesizey,imagesizexpre,imagesizeypre, photo, keyframes,currentframe,checkboxstate if currentframe == 1: c1.select() else: if checkboxstate.get(): rectsizex=imagesizex/2 rectsizey=(rectsizex*9)/16 rectcenterx=imagesizex/2 rectcentery=imagesizey/2 #keyframes[currentframe]=[rectsizex,rectsizey,rectcenterx,rectcentery] drawRect(canvas,rectangle) else: del keyframes[currentframe] print &quot;deleted keyframe&quot; canvas.tag_lower(rectangle) &#39;&#39;&#39; #graceful exit def ask_quit(root): if tkMessageBox.askokcancel(&quot;Quit&quot;, &quot;Do you want to quit now?&quot;): root.destroy() &#39;&#39;&#39; def initGUI(inputfolder, outputfolder): # global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,imagesizex,imagesizey,imagesizexpre,imagesizeypre, photo, keyframes,currentframe,checkboxstate #Create User Interface # root = Tkinter.Tk() #root.columnconfigure(0, weight=1) #root.rowconfigure(0, weight=1) canvas = Tkinter.Canvas(root) files = sorted(glob.glob(outputfolder + &quot;/IMG_*.jpg&quot;)) #add image to canvas image = Image.open(files[0]) imagesizexpre = image.size[0] imagesizeypre = image.size[1] image.thumbnail((350, 350), Image.ANTIALIAS) imagesizex = image.size[0] imagesizey = image.size[1] #set initial rect size rectsizex=imagesizex/2 rectsizey=(rectsizex*9)/16 rectcenterx=imagesizex/2 rectcentery=imagesizey/2 currentframe=1 keyframes={1:[rectsizex,rectsizey,rectcenterx,rectcentery]} photo = ImageTk.PhotoImage(image) canvasimage = canvas.create_image(0,0, image=photo, anchor=Tkinter.NW) rectangle=canvas.create_rectangle(rectcenterx-rectsizex, rectcentery-rectsizey, rectcenterx+rectsizex, rectcentery+rectsizey, outline=&quot;#fb0&quot;) #generate header button row HeaderRow = Tkinter.Frame(root) b1 = Tkinter.Button(HeaderRow, text=&quot;One&quot;) b2 = Tkinter.Button(HeaderRow, text=&quot;Two&quot;) checkboxstate=Tkinter.IntVar() c1 = Tkinter.Checkbutton(HeaderRow, text=&quot;Keyframe&quot;, variable=checkboxstate, command=lambda: checkboxClicked(canvas,rectangle,c1)) headerLabel1 = Tkinter.Label(HeaderRow, text=&quot;frame #&quot;) headerLabel2 = Tkinter.Label(HeaderRow, text=&quot;of %d&quot; % len(files)) FrameNumSpin = Tkinter.Spinbox(HeaderRow, from_=1, to_=len(files), command=lambda: changeFrame(FrameNumSpin, outputfolder,canvas,canvasimage,rectangle,c1)) b1.pack(side = Tkinter.LEFT) b2.pack(side = Tkinter.LEFT) c1.pack(side = Tkinter.LEFT) headerLabel1.pack(side = Tkinter.LEFT) FrameNumSpin.pack(side = Tkinter.LEFT) headerLabel2.pack(side = Tkinter.LEFT) HeaderRow.grid(column=0, row=0) c1.select() #create canvas canvas.grid(column=0, row=1, sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S)) canvas.bind(&quot;&quot;, xy) canvas.bind(&quot;&quot;, lambda event: canvasmotion(event, canvas, rectangle)) #generate foot button row FooterRow = Tkinter.Frame(root) footerLabel = Tkinter.Label(FooterRow, text=&quot;Useful help tips&quot;) b3 = Tkinter.Button(FooterRow, text=&quot;Three&quot;) b4 = Tkinter.Button(FooterRow,text=&quot;Process!&quot;, command=lambda: processTimelapse(imagesizex,imagesizey,imagesizexpre,imagesizeypre,inputfolder,outputfolder)) footerLabel.pack(side = Tkinter.LEFT) b3.pack(side = Tkinter.LEFT) b4.pack(side = Tkinter.LEFT) FooterRow.grid(column=0, row=3) #root.protocol(&quot;WM_DELETE_WINDOW&quot;, ask_quit()) root.title (&quot;Timelapse&quot;) #w,h = root.winfo_screenwidth(), root.winfo_screenheight() #root.geometry(&quot;%dx%d+0+0&quot; % (w,h)) root.mainloop() def processTimelapse(imagesizex,imagesizey,imagesizexpre,imagesizeypre,inputfolder,outputfolder): global rectcenterx,rectcentery,rectsizex,rectsizey,aspectx,aspecty,keyframes #renumberjpeg(inputfolder,outputfolder) i=0 files = sorted(glob.glob(outputfolder + &quot;/IMG_*.jpg&quot;)) if not os.path.exists(outputfolder+&quot;/resized&quot;): os.makedirs(outputfolder+&quot;/resized&quot;) for onefile in files: if fnmatch.fnmatch(onefile, &#39;*.jpg&#39;): print &quot;cropping %s&quot; % onefile filename=onefile image = Image.open(filename) for keyframe in sorted(keyframes): if keyframe==i+1: print &quot;equals&quot; rectsizex=keyframes[i+1][0] rectsizey=keyframes[i+1][1] rectcenterx=keyframes[i+1][2] rectcentery=keyframes[i+1][3] interpolatelatch=0 rectsizexslice=0 rectsizeyslice=0 rectcenterxslice=0 rectcenteryslice=0 break elif keyframe&gt;(i+1): print &quot;greaterthan&quot; if interpolatelatch==0: rectsizexslice=(keyframes[keyframe][0]-rectsizex)/(keyframe-(i)) rectsizeyslice=(keyframes[keyframe][1]-rectsizey)/(keyframe-(i)) rectcenterxslice=(keyframes[keyframe][2]-rectcenterx)/(keyframe-(i)) rectcenteryslice=(keyframes[keyframe][3]-rectcentery)/(keyframe-(i)) interpolatelatch=1 rectsizex=rectsizex+rectsizexslice rectsizey=rectsizey+rectsizeyslice rectcenterx=rectcenterx+rectcenterxslice rectcentery=rectcentery+rectcenteryslice break box = (int((rectcenterx-rectsizex)*imagesizexpre/imagesizex), int((rectcentery-rectsizey)*imagesizeypre/imagesizey), int((rectcenterx+rectsizex)*imagesizexpre/imagesizex), int((rectcentery+rectsizey)*imagesizeypre/imagesizey)) print box area = image.crop(box) area = area.resize((1920, 1080), Image.ANTIALIAS) area.save(outputfolder+&quot;/resized/%03d.jpg&quot; % i, &#39;jpeg&#39;) i=i+1 cmd = &quot;avconv -i %s/resized/&quot; % outputfolder cmd= cmd + &quot;%&quot; + &quot;03d.jpg -r 24 -s hd1080 -vcodec libx264 -crf 16 %s/timelapse.mp4&quot; % outputfolder os.system(cmd) def main(argv): # print command line arguments inputfolder = &#39;&#39; outputfolder = &#39;&#39; process = 0 try: opts, args = getopt.getopt(argv,&quot;hi:o:r&quot;,[&quot;ifolder=&quot;,&quot;ofolder=&quot;]) except getopt.GetoptError: print &#39;timelapse.py -i -o -r &#39; sys.exit(2) for opt, arg in opts: if opt == &#39;-h&#39;: print &#39;timelapse.py -i -o -r &#39; sys.exit() elif opt in (&quot;-i&quot;, &quot;--ifolder&quot;): inputfolder = arg elif opt in (&quot;-o&quot;, &quot;--ofolder&quot;): outputfolder = arg elif opt == &quot;-r&quot;: process = 1 print &#39;Input folder is &quot;&#39;, inputfolder print &#39;Output folder is &quot;&#39;, outputfolder if process==1: deflickerRAW(inputfolder, outputfolder) initGUI(inputfolder, outputfolder) if __name__ == &quot;__main__&quot;: main(sys.argv[1:])" />
+<link rel="canonical" href="http://localhost:4000/2012/10/22/751/" />
+<meta property="og:url" content="http://localhost:4000/2012/10/22/751/" />
+<meta property="og:site_name" content="Jordan Colburn" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2012-10-22T07:42:57-04:00" />
+<script type="application/ld+json">
+{"headline":"Python Script for RAW Timelapses with Ken Burns style panning","dateModified":"2012-10-22T07:42:57-04:00","datePublished":"2012-10-22T07:42:57-04:00","description":"Since installing magic lantern&nbsp;on my Canon t3i, I&#39;ve been very interested in starting to learn to create timelapses. &nbsp;I&#39;m specifically impressed with timelapses with ken burns effect styled motion like this one from Philip Bloom:&nbsp;http://philipbloom.net/film/24-hours-of-neon/ The only downside is, I didn&#39;t have all the software tools to make it work. &nbsp;To solve this, I wrote my own python script to automate the timelapse process and provide a GUI to select unlimited keyframes for ken burns style motion. &nbsp;My first test can be seen below. The script, builds upon the RAW deflickr script written by a1ex from the Magic Lantern project Current Dependencies: (can all be installed on most versions of GNU/Linux with apt-get) *Timelapse ffmpeg* python yasm x264 imagemagick ffmpeg *Deflicker* numpy scipy matplotlib dcraw ufraw imagemagick *GUI* PIL to start it use the command line format: python timelapse.py -i raw -o jpg -r Where timelapse.py is the script, raw is the input folder containing canon raw files, and jpg is the destination folder for converted jpg and movie. The -r switch designates that the files in raw will be developed, leave this out if you already have converted files in the jpg directory. The script is a little rough around the edges, but it works well enough for me. Comment if you have any improvements&nbsp;or questions. from __future__ import division import os import glob import sys, re, time, datetime, subprocess, shlex, getopt, fnmatch from math import * from pylab import * import Tkinter import ttk import tkMessageBox from PIL import Image, ImageTk # RAW deflickering script # Copyright (2012) a1ex. License: GPL. def progress(x, interval=1): global _progress_first_time, _progress_last_time, _progress_message, _progress_interval try: p = float(x) init = False except: init = True if init: _progress_message = x _progress_last_time = time.time() _progress_first_time = time.time() _progress_interval = interval elif x: if time.time() - _progress_last_time &gt; _progress_interval: print &gt;&gt; sys.stderr, &quot;%s [%d%% done, ETA %s]...&quot; % (_progress_message, int(100*p), datetime.timedelta(seconds = round((1-p)/p*(time.time()-_progress_first_time)))) _progress_last_time = time.time() def change_ext(file, newext): if newext and (not newext.startswith(&quot;.&quot;)): newext = &quot;.&quot; + newext return os.path.splitext(file)[0] + newext def get_median(file): cmd1 = &quot;dcraw -c -D -4 -o 0 &#39;%s&#39;&quot; % file cmd2 = &quot;convert - -type Grayscale -scale 500x500 -format %c histogram:info:-&quot; #~ print cmd1, &quot;|&quot;, cmd2 p1 = subprocess.Popen(shlex.split(cmd1), stdout=subprocess.PIPE) p2 = subprocess.Popen(shlex.split(cmd2), stdin=p1.stdout, stdout=subprocess.PIPE) lines = p2.communicate()[0].split(&quot;\\n&quot;) X = [] for l in lines[1:]: p1 = l.find(&quot;(&quot;) if p1 &gt; 0: p2 = l.find(&quot;,&quot;, p1) level = int(l[p1+1:p2]) count = int(l[:p1-2]) X += [level]*count m = median(X) return m def deflickerRAW(inputfolder, outputfolder): ion() progress(&quot;Analyzing RAW exposures...&quot;); files = sorted(os.listdir(inputfolder)) i = 0; M = []; for k,f in enumerate(files): m = get_median(os.path.join(inputfolder, f)) M.append(m); E = [-log2(m/M[0]) for m in M] E = detrend(array(E)) cla(); stem(range(1,len(E)+1), E); xlabel(&#39;Image number&#39;) ylabel(&#39;Exposure correction (EV)&#39;) title(f) draw(); progress(k / len(files)) if not os.path.exists(outputfolder): os.makedirs(outputfolder) progress(&quot;Developing JPG images...&quot;); i = 0; for k,f in enumerate(files): ec = 2 + E[k]; cmd = &quot;ufraw-batch --out-type=jpg --overwrite --clip=film --saturation=2 --exposure=%s &#39;%s&#39; --output=&#39;%s/%s&#39;&quot; % (ec, os.path.join(inputfolder, f),outputfolder, change_ext(f, &quot;.jpg&quot;)) os.system(cmd) progress(k / len(files)) #declare variables############ moving=False resize=False aspectx=16 aspecty=9 rectcenterx=0 rectcentery=0 rectsizex=0 rectsizey=0 imagesizexpre=0 imagesizeypre=0 imagesizex=0 imagesizey=0 #Events######################### #triggers on left click in canvas def xy(event): global rectcenterx, rectcentery, rectsizex, rectsizey, moving, resize #if moving or resize: moving=False resize=False #detect rectangle center grab for move if event.x&gt;(rectcenterx-int(rectsizex/2)) and event.x&lt;(rectcenterx+int(rectsizex/2)) and event.y&lt;(int(rectcentery+rectsizey/2)) and event.y&gt;(int(rectcentery-rectsizey/2)): moving=True #detect lower right rectangle corner grabs for resize if event.x&gt;(rectcenterx+rectsizex-rectsizex/4) and event.x&lt;(rectcenterx+rectsizex+rectsizex/4) and event.y&lt;(rectcentery+rectsizey+rectsizey/4) and event.y&gt;(rectcentery+rectsizey-rectsizey/4): resize=True #triggers on motion in canvas def canvasmotion(event, canvas, rectangle): global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,checkboxstate if checkboxstate.get(): if moving: if ((event.x+rectsizex&lt;imagesizex) and (event.x-rectsizex&gt;0)): rectcenterx=event.x if ((event.y+rectsizey&lt;imagesizey) and (event.y-rectsizey&gt;0)): rectcentery=event.y if resize: if (event.x&lt;=imagesizex) and (event.x-(2*(event.x-rectcenterx))&gt;=0) and (rectcentery-((event.x-rectcenterx)*aspecty/aspectx))&gt;0 and int((event.x-rectcenterx)*2*imagesizexpre/imagesizex)&gt;=1920: rectsizex=event.x-rectcenterx rectsizey=(rectsizex*aspecty)/aspectx drawRect(canvas,rectangle) def drawRect(canvas, rectangle): global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,keyframes,currentframe canvas.tag_raise(rectangle) canvas.coords(rectangle, rectcenterx-rectsizex, rectcentery-rectsizey, rectcenterx+rectsizex, rectcentery+rectsizey) keyframes[currentframe]=[rectsizex,rectsizey,rectcenterx,rectcentery] def changeFrame(FrameNumSpin, outputfolder, canvas, canvasimage, rectangle,c1): global rectcenterx,rectcentery,rectsizex,rectsizey,photo,currentframe,checkboxstate currentframe = int(FrameNumSpin.get()) files = sorted(glob.glob(outputfolder + &quot;/IMG_*.jpg&quot;)) image = Image.open(files[currentframe-1]) image.thumbnail((350, 350), Image.ANTIALIAS) photo = ImageTk.PhotoImage(image) canvas.delete(canvasimage) canvasimage = canvas.create_image(0,0, image=photo, anchor=Tkinter.NW) c1.deselect() for keyframe in keyframes: if keyframe==currentframe: c1.select() rectsizex=keyframes[currentframe][0] rectsizey=keyframes[currentframe][1] rectcenterx=keyframes[currentframe][2] rectcentery=keyframes[currentframe][3] drawRect(canvas, rectangle) break def checkboxClicked(canvas,rectangle,c1): global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,imagesizex,imagesizey,imagesizexpre,imagesizeypre, photo, keyframes,currentframe,checkboxstate if currentframe == 1: c1.select() else: if checkboxstate.get(): rectsizex=imagesizex/2 rectsizey=(rectsizex*9)/16 rectcenterx=imagesizex/2 rectcentery=imagesizey/2 #keyframes[currentframe]=[rectsizex,rectsizey,rectcenterx,rectcentery] drawRect(canvas,rectangle) else: del keyframes[currentframe] print &quot;deleted keyframe&quot; canvas.tag_lower(rectangle) &#39;&#39;&#39; #graceful exit def ask_quit(root): if tkMessageBox.askokcancel(&quot;Quit&quot;, &quot;Do you want to quit now?&quot;): root.destroy() &#39;&#39;&#39; def initGUI(inputfolder, outputfolder): # global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,imagesizex,imagesizey,imagesizexpre,imagesizeypre, photo, keyframes,currentframe,checkboxstate #Create User Interface # root = Tkinter.Tk() #root.columnconfigure(0, weight=1) #root.rowconfigure(0, weight=1) canvas = Tkinter.Canvas(root) files = sorted(glob.glob(outputfolder + &quot;/IMG_*.jpg&quot;)) #add image to canvas image = Image.open(files[0]) imagesizexpre = image.size[0] imagesizeypre = image.size[1] image.thumbnail((350, 350), Image.ANTIALIAS) imagesizex = image.size[0] imagesizey = image.size[1] #set initial rect size rectsizex=imagesizex/2 rectsizey=(rectsizex*9)/16 rectcenterx=imagesizex/2 rectcentery=imagesizey/2 currentframe=1 keyframes={1:[rectsizex,rectsizey,rectcenterx,rectcentery]} photo = ImageTk.PhotoImage(image) canvasimage = canvas.create_image(0,0, image=photo, anchor=Tkinter.NW) rectangle=canvas.create_rectangle(rectcenterx-rectsizex, rectcentery-rectsizey, rectcenterx+rectsizex, rectcentery+rectsizey, outline=&quot;#fb0&quot;) #generate header button row HeaderRow = Tkinter.Frame(root) b1 = Tkinter.Button(HeaderRow, text=&quot;One&quot;) b2 = Tkinter.Button(HeaderRow, text=&quot;Two&quot;) checkboxstate=Tkinter.IntVar() c1 = Tkinter.Checkbutton(HeaderRow, text=&quot;Keyframe&quot;, variable=checkboxstate, command=lambda: checkboxClicked(canvas,rectangle,c1)) headerLabel1 = Tkinter.Label(HeaderRow, text=&quot;frame #&quot;) headerLabel2 = Tkinter.Label(HeaderRow, text=&quot;of %d&quot; % len(files)) FrameNumSpin = Tkinter.Spinbox(HeaderRow, from_=1, to_=len(files), command=lambda: changeFrame(FrameNumSpin, outputfolder,canvas,canvasimage,rectangle,c1)) b1.pack(side = Tkinter.LEFT) b2.pack(side = Tkinter.LEFT) c1.pack(side = Tkinter.LEFT) headerLabel1.pack(side = Tkinter.LEFT) FrameNumSpin.pack(side = Tkinter.LEFT) headerLabel2.pack(side = Tkinter.LEFT) HeaderRow.grid(column=0, row=0) c1.select() #create canvas canvas.grid(column=0, row=1, sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S)) canvas.bind(&quot;&quot;, xy) canvas.bind(&quot;&quot;, lambda event: canvasmotion(event, canvas, rectangle)) #generate foot button row FooterRow = Tkinter.Frame(root) footerLabel = Tkinter.Label(FooterRow, text=&quot;Useful help tips&quot;) b3 = Tkinter.Button(FooterRow, text=&quot;Three&quot;) b4 = Tkinter.Button(FooterRow,text=&quot;Process!&quot;, command=lambda: processTimelapse(imagesizex,imagesizey,imagesizexpre,imagesizeypre,inputfolder,outputfolder)) footerLabel.pack(side = Tkinter.LEFT) b3.pack(side = Tkinter.LEFT) b4.pack(side = Tkinter.LEFT) FooterRow.grid(column=0, row=3) #root.protocol(&quot;WM_DELETE_WINDOW&quot;, ask_quit()) root.title (&quot;Timelapse&quot;) #w,h = root.winfo_screenwidth(), root.winfo_screenheight() #root.geometry(&quot;%dx%d+0+0&quot; % (w,h)) root.mainloop() def processTimelapse(imagesizex,imagesizey,imagesizexpre,imagesizeypre,inputfolder,outputfolder): global rectcenterx,rectcentery,rectsizex,rectsizey,aspectx,aspecty,keyframes #renumberjpeg(inputfolder,outputfolder) i=0 files = sorted(glob.glob(outputfolder + &quot;/IMG_*.jpg&quot;)) if not os.path.exists(outputfolder+&quot;/resized&quot;): os.makedirs(outputfolder+&quot;/resized&quot;) for onefile in files: if fnmatch.fnmatch(onefile, &#39;*.jpg&#39;): print &quot;cropping %s&quot; % onefile filename=onefile image = Image.open(filename) for keyframe in sorted(keyframes): if keyframe==i+1: print &quot;equals&quot; rectsizex=keyframes[i+1][0] rectsizey=keyframes[i+1][1] rectcenterx=keyframes[i+1][2] rectcentery=keyframes[i+1][3] interpolatelatch=0 rectsizexslice=0 rectsizeyslice=0 rectcenterxslice=0 rectcenteryslice=0 break elif keyframe&gt;(i+1): print &quot;greaterthan&quot; if interpolatelatch==0: rectsizexslice=(keyframes[keyframe][0]-rectsizex)/(keyframe-(i)) rectsizeyslice=(keyframes[keyframe][1]-rectsizey)/(keyframe-(i)) rectcenterxslice=(keyframes[keyframe][2]-rectcenterx)/(keyframe-(i)) rectcenteryslice=(keyframes[keyframe][3]-rectcentery)/(keyframe-(i)) interpolatelatch=1 rectsizex=rectsizex+rectsizexslice rectsizey=rectsizey+rectsizeyslice rectcenterx=rectcenterx+rectcenterxslice rectcentery=rectcentery+rectcenteryslice break box = (int((rectcenterx-rectsizex)*imagesizexpre/imagesizex), int((rectcentery-rectsizey)*imagesizeypre/imagesizey), int((rectcenterx+rectsizex)*imagesizexpre/imagesizex), int((rectcentery+rectsizey)*imagesizeypre/imagesizey)) print box area = image.crop(box) area = area.resize((1920, 1080), Image.ANTIALIAS) area.save(outputfolder+&quot;/resized/%03d.jpg&quot; % i, &#39;jpeg&#39;) i=i+1 cmd = &quot;avconv -i %s/resized/&quot; % outputfolder cmd= cmd + &quot;%&quot; + &quot;03d.jpg -r 24 -s hd1080 -vcodec libx264 -crf 16 %s/timelapse.mp4&quot; % outputfolder os.system(cmd) def main(argv): # print command line arguments inputfolder = &#39;&#39; outputfolder = &#39;&#39; process = 0 try: opts, args = getopt.getopt(argv,&quot;hi:o:r&quot;,[&quot;ifolder=&quot;,&quot;ofolder=&quot;]) except getopt.GetoptError: print &#39;timelapse.py -i -o -r &#39; sys.exit(2) for opt, arg in opts: if opt == &#39;-h&#39;: print &#39;timelapse.py -i -o -r &#39; sys.exit() elif opt in (&quot;-i&quot;, &quot;--ifolder&quot;): inputfolder = arg elif opt in (&quot;-o&quot;, &quot;--ofolder&quot;): outputfolder = arg elif opt == &quot;-r&quot;: process = 1 print &#39;Input folder is &quot;&#39;, inputfolder print &#39;Output folder is &quot;&#39;, outputfolder if process==1: deflickerRAW(inputfolder, outputfolder) initGUI(inputfolder, outputfolder) if __name__ == &quot;__main__&quot;: main(sys.argv[1:])","url":"http://localhost:4000/2012/10/22/751/","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2012/10/22/751/"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Jordan Colburn" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Jordan Colburn</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/archive/">Archive</a><a class="page-link" href="/blog/">Blog</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Python Script for RAW Timelapses with Ken Burns style panning</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2012-10-22T07:42:57-04:00" itemprop="datePublished">Oct 22, 2012
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Since installing <a href="http://www.magiclantern.fm/">magic lantern</a>&nbsp;on my Canon t3i, I've been very interested in starting to learn to create timelapses. &nbsp;I'm specifically impressed with timelapses with ken burns effect styled motion like this one from Philip Bloom:&nbsp;<a href="http://philipbloom.net/film/24-hours-of-neon/">http://philipbloom.net/film/24-hours-of-neon/</a> The only downside is, I didn't have all the software tools to make it work. &nbsp;To solve this, I wrote my own python script to automate the timelapse process and provide a GUI to select unlimited keyframes for ken burns style motion. &nbsp;My first test can be seen below.</p>
+<p><iframe src="https://www.youtube.com/embed/cR8x3rMjpuw?rel=0" frameborder="0" width="560" height="315"></iframe></p>
+<p>The script, builds upon the RAW deflickr script written by a1ex from the Magic Lantern project Current Dependencies: (can all be installed on most versions of GNU/Linux with apt-get) *Timelapse ffmpeg* python yasm x264 imagemagick ffmpeg *Deflicker* numpy scipy matplotlib dcraw ufraw imagemagick *GUI* PIL to start it use the command line format: python timelapse.py -i raw -o jpg -r Where timelapse.py is the script, raw is the input folder containing canon raw files, and jpg is the destination folder for converted jpg and movie. The -r switch designates that the files in raw will be developed, leave this out if you already have converted files in the jpg directory. The script is a little rough around the edges, but it works well enough for me. Comment if you have any improvements&nbsp;or questions.</p>
+<!--more-->
+<pre>from __future__ import division
+import os
+import glob
+import sys, re, time, datetime, subprocess, shlex, getopt, fnmatch
+from math import *
+from pylab import *
+import Tkinter
+import ttk
+import tkMessageBox
+from PIL import Image, ImageTk
+
+# RAW deflickering script
+# Copyright (2012) a1ex. License: GPL.
+def progress(x, interval=1):
+    global _progress_first_time, _progress_last_time, _progress_message, _progress_interval
+
+    try:
+        p = float(x)
+        init = False
+    except:
+        init = True
+
+    if init:
+        _progress_message = x
+        _progress_last_time = time.time()
+        _progress_first_time = time.time()
+        _progress_interval = interval
+    elif x:
+        if time.time() - _progress_last_time &gt; _progress_interval:
+            print &gt;&gt; sys.stderr, "%s [%d%% done, ETA %s]..." % (_progress_message, int(100*p), datetime.timedelta(seconds = round((1-p)/p*(time.time()-_progress_first_time))))
+            _progress_last_time = time.time()
+
+def change_ext(file, newext):
+    if newext and (not newext.startswith(".")):
+        newext = "." + newext
+    return os.path.splitext(file)[0] + newext
+
+def get_median(file):
+    cmd1 = "dcraw -c -D -4 -o 0 '%s'" % file
+    cmd2 = "convert - -type Grayscale -scale 500x500 -format %c histogram:info:-"
+    #~ print cmd1, "|", cmd2
+    p1 = subprocess.Popen(shlex.split(cmd1), stdout=subprocess.PIPE)
+    p2 = subprocess.Popen(shlex.split(cmd2), stdin=p1.stdout, stdout=subprocess.PIPE)
+    lines = p2.communicate()[0].split("\n")
+    X = []
+    for l in lines[1:]:
+        p1 = l.find("(")
+        if p1 &gt; 0:
+            p2 = l.find(",", p1)
+            level = int(l[p1+1:p2])
+            count = int(l[:p1-2])
+            X += [level]*count
+    m = median(X)
+    return m
+
+def deflickerRAW(inputfolder, outputfolder):
+    ion()
+
+    progress("Analyzing RAW exposures...");
+    files = sorted(os.listdir(inputfolder))
+    i = 0;
+    M = [];
+    for k,f in enumerate(files):
+        m = get_median(os.path.join(inputfolder, f))
+        M.append(m);
+
+        E = [-log2(m/M[0]) for m in M]
+        E = detrend(array(E))
+        cla(); stem(range(1,len(E)+1), E);
+        xlabel('Image number')
+        ylabel('Exposure correction (EV)')
+        title(f)
+        draw();
+        progress(k / len(files))
+
+    if not os.path.exists(outputfolder):
+        os.makedirs(outputfolder)
+
+    progress("Developing JPG images...");
+    i = 0;
+    for k,f in enumerate(files):
+        ec = 2 + E[k];
+        cmd = "ufraw-batch --out-type=jpg --overwrite --clip=film --saturation=2 --exposure=%s '%s' --output='%s/%s'" % (ec, os.path.join(inputfolder, f),outputfolder, change_ext(f, ".jpg"))
+        os.system(cmd)
+        progress(k / len(files))
+
+#declare variables############
+moving=False
+resize=False
+aspectx=16
+aspecty=9
+rectcenterx=0
+rectcentery=0
+rectsizex=0
+rectsizey=0
+imagesizexpre=0
+imagesizeypre=0
+imagesizex=0
+imagesizey=0
+
+#Events#########################
+#triggers on left click in canvas
+def xy(event):
+    global rectcenterx, rectcentery, rectsizex, rectsizey, moving, resize
+
+    #if moving or resize:
+    moving=False
+    resize=False
+     #detect rectangle center grab for move   
+    if event.x&gt;(rectcenterx-int(rectsizex/2)) and event.x&lt;(rectcenterx+int(rectsizex/2)) and event.y&lt;(int(rectcentery+rectsizey/2)) and event.y&gt;(int(rectcentery-rectsizey/2)):
+        moving=True
+    #detect lower right rectangle corner grabs for resize    
+    if event.x&gt;(rectcenterx+rectsizex-rectsizex/4) and event.x&lt;(rectcenterx+rectsizex+rectsizex/4) and event.y&lt;(rectcentery+rectsizey+rectsizey/4) and event.y&gt;(rectcentery+rectsizey-rectsizey/4):
+        resize=True
+
+#triggers on motion in canvas     
+def canvasmotion(event, canvas, rectangle):
+    global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,checkboxstate
+    if checkboxstate.get():
+        if moving:
+            if ((event.x+rectsizex&lt;imagesizex) and (event.x-rectsizex&gt;0)):
+                rectcenterx=event.x
+            if ((event.y+rectsizey&lt;imagesizey) and (event.y-rectsizey&gt;0)):
+                rectcentery=event.y
+        if resize:
+                if (event.x&lt;=imagesizex) and (event.x-(2*(event.x-rectcenterx))&gt;=0) and (rectcentery-((event.x-rectcenterx)*aspecty/aspectx))&gt;0 and int((event.x-rectcenterx)*2*imagesizexpre/imagesizex)&gt;=1920:
+                    rectsizex=event.x-rectcenterx
+                    rectsizey=(rectsizex*aspecty)/aspectx        
+        drawRect(canvas,rectangle)
+
+def drawRect(canvas, rectangle):
+    global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,keyframes,currentframe
+    canvas.tag_raise(rectangle)
+    canvas.coords(rectangle, rectcenterx-rectsizex, rectcentery-rectsizey, rectcenterx+rectsizex, rectcentery+rectsizey)
+    keyframes[currentframe]=[rectsizex,rectsizey,rectcenterx,rectcentery]
+
+def changeFrame(FrameNumSpin, outputfolder, canvas, canvasimage, rectangle,c1):
+    global rectcenterx,rectcentery,rectsizex,rectsizey,photo,currentframe,checkboxstate
+    currentframe = int(FrameNumSpin.get())
+    files = sorted(glob.glob(outputfolder + "/IMG_*.jpg"))
+    image = Image.open(files[currentframe-1])
+    image.thumbnail((350, 350), Image.ANTIALIAS)
+    photo = ImageTk.PhotoImage(image)
+    canvas.delete(canvasimage)
+    canvasimage = canvas.create_image(0,0, image=photo, anchor=Tkinter.NW)
+    c1.deselect()
+    for keyframe in keyframes:
+        if keyframe==currentframe:
+            c1.select()
+            rectsizex=keyframes[currentframe][0]
+            rectsizey=keyframes[currentframe][1]
+            rectcenterx=keyframes[currentframe][2]
+            rectcentery=keyframes[currentframe][3]
+            drawRect(canvas, rectangle)
+            break
+
+def checkboxClicked(canvas,rectangle,c1):
+    global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,imagesizex,imagesizey,imagesizexpre,imagesizeypre, photo, keyframes,currentframe,checkboxstate
+    if currentframe == 1:
+        c1.select()
+    else:
+        if checkboxstate.get():
+            rectsizex=imagesizex/2
+            rectsizey=(rectsizex*9)/16
+            rectcenterx=imagesizex/2
+            rectcentery=imagesizey/2
+            #keyframes[currentframe]=[rectsizex,rectsizey,rectcenterx,rectcentery]
+            drawRect(canvas,rectangle)
+        else:
+            del keyframes[currentframe]
+            print "deleted keyframe"
+            canvas.tag_lower(rectangle)
+'''
+#graceful exit
+def ask_quit(root):
+    if tkMessageBox.askokcancel("Quit", "Do you want to quit now?"):
+        root.destroy()
+'''
+
+def initGUI(inputfolder, outputfolder):
+    #
+    global rectcenterx,rectcentery,rectsizex,rectsizey,moving,imagesizex,imagesizey,resize,aspectx,aspecty,imagesizex,imagesizey,imagesizexpre,imagesizeypre, photo, keyframes,currentframe,checkboxstate
+    #Create User Interface
+    #
+    root = Tkinter.Tk()
+    #root.columnconfigure(0, weight=1)
+    #root.rowconfigure(0, weight=1)
+
+    canvas = Tkinter.Canvas(root)
+    files = sorted(glob.glob(outputfolder + "/IMG_*.jpg"))
+    #add image to canvas
+    image = Image.open(files[0])
+    imagesizexpre = image.size[0]
+    imagesizeypre = image.size[1]
+    image.thumbnail((350, 350), Image.ANTIALIAS)
+    imagesizex = image.size[0]
+    imagesizey = image.size[1]
+
+    #set initial rect size
+    rectsizex=imagesizex/2
+    rectsizey=(rectsizex*9)/16
+    rectcenterx=imagesizex/2
+    rectcentery=imagesizey/2
+    currentframe=1
+    keyframes={1:[rectsizex,rectsizey,rectcenterx,rectcentery]}
+
+    photo = ImageTk.PhotoImage(image)
+    canvasimage = canvas.create_image(0,0, image=photo, anchor=Tkinter.NW)
+    rectangle=canvas.create_rectangle(rectcenterx-rectsizex, rectcentery-rectsizey, rectcenterx+rectsizex, rectcentery+rectsizey, outline="#fb0")
+    #generate header button row
+    HeaderRow = Tkinter.Frame(root)
+    b1 = Tkinter.Button(HeaderRow, text="One")
+    b2 = Tkinter.Button(HeaderRow, text="Two")
+    checkboxstate=Tkinter.IntVar()
+    c1 = Tkinter.Checkbutton(HeaderRow, text="Keyframe", variable=checkboxstate, command=lambda: checkboxClicked(canvas,rectangle,c1))
+    headerLabel1 = Tkinter.Label(HeaderRow, text="frame #")
+    headerLabel2 = Tkinter.Label(HeaderRow, text="of %d" % len(files))
+    FrameNumSpin = Tkinter.Spinbox(HeaderRow, from_=1, to_=len(files), command=lambda: changeFrame(FrameNumSpin, outputfolder,canvas,canvasimage,rectangle,c1))
+    b1.pack(side = Tkinter.LEFT)
+    b2.pack(side = Tkinter.LEFT)
+    c1.pack(side = Tkinter.LEFT)
+    headerLabel1.pack(side = Tkinter.LEFT)
+    FrameNumSpin.pack(side = Tkinter.LEFT)
+    headerLabel2.pack(side = Tkinter.LEFT)
+    HeaderRow.grid(column=0, row=0)
+    c1.select()
+    #create canvas
+    canvas.grid(column=0, row=1, sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    canvas.bind("", xy)
+    canvas.bind("", lambda event: canvasmotion(event, canvas, rectangle))
+    #generate foot button row
+    FooterRow = Tkinter.Frame(root)
+    footerLabel = Tkinter.Label(FooterRow, text="Useful help tips")
+    b3 = Tkinter.Button(FooterRow, text="Three")
+    b4 = Tkinter.Button(FooterRow,text="Process!", command=lambda: processTimelapse(imagesizex,imagesizey,imagesizexpre,imagesizeypre,inputfolder,outputfolder))
+    footerLabel.pack(side = Tkinter.LEFT)
+    b3.pack(side = Tkinter.LEFT)
+    b4.pack(side = Tkinter.LEFT)
+    FooterRow.grid(column=0, row=3)
+
+    #root.protocol("WM_DELETE_WINDOW", ask_quit())
+    root.title ("Timelapse")
+    #w,h = root.winfo_screenwidth(), root.winfo_screenheight()
+    #root.geometry("%dx%d+0+0" % (w,h))
+    root.mainloop()
+
+def processTimelapse(imagesizex,imagesizey,imagesizexpre,imagesizeypre,inputfolder,outputfolder):
+    global rectcenterx,rectcentery,rectsizex,rectsizey,aspectx,aspecty,keyframes
+    #renumberjpeg(inputfolder,outputfolder)	 
+    i=0
+    files = sorted(glob.glob(outputfolder + "/IMG_*.jpg"))
+    if not os.path.exists(outputfolder+"/resized"):
+        os.makedirs(outputfolder+"/resized")
+    for onefile in files:
+        if fnmatch.fnmatch(onefile, '*.jpg'):
+            print "cropping %s" % onefile 
+            filename=onefile
+            image = Image.open(filename)
+            for keyframe in sorted(keyframes):
+                if keyframe==i+1:
+                    print "equals"
+                    rectsizex=keyframes[i+1][0]
+                    rectsizey=keyframes[i+1][1]
+                    rectcenterx=keyframes[i+1][2]
+                    rectcentery=keyframes[i+1][3]
+                    interpolatelatch=0
+                    rectsizexslice=0
+                    rectsizeyslice=0
+                    rectcenterxslice=0
+                    rectcenteryslice=0
+		    break
+                elif keyframe&gt;(i+1):
+		    print "greaterthan"
+                    if interpolatelatch==0:    
+                        rectsizexslice=(keyframes[keyframe][0]-rectsizex)/(keyframe-(i))
+                        rectsizeyslice=(keyframes[keyframe][1]-rectsizey)/(keyframe-(i))
+                        rectcenterxslice=(keyframes[keyframe][2]-rectcenterx)/(keyframe-(i))
+                        rectcenteryslice=(keyframes[keyframe][3]-rectcentery)/(keyframe-(i))
+                        interpolatelatch=1
+		    rectsizex=rectsizex+rectsizexslice
+		    rectsizey=rectsizey+rectsizeyslice
+		    rectcenterx=rectcenterx+rectcenterxslice
+		    rectcentery=rectcentery+rectcenteryslice
+                    break
+            box = (int((rectcenterx-rectsizex)*imagesizexpre/imagesizex), int((rectcentery-rectsizey)*imagesizeypre/imagesizey), int((rectcenterx+rectsizex)*imagesizexpre/imagesizex), int((rectcentery+rectsizey)*imagesizeypre/imagesizey))
+            print box
+	    area = image.crop(box)
+            area = area.resize((1920, 1080), Image.ANTIALIAS)
+            area.save(outputfolder+"/resized/%03d.jpg" % i, 'jpeg')
+            i=i+1
+    cmd = "avconv -i %s/resized/" % outputfolder
+    cmd= cmd + "%" + "03d.jpg -r 24 -s hd1080 -vcodec libx264 -crf 16 %s/timelapse.mp4" % outputfolder
+    os.system(cmd)
+
+def main(argv):
+    # print command line arguments
+    inputfolder = ''
+    outputfolder = ''
+    process = 0
+    try:
+        opts, args = getopt.getopt(argv,"hi:o:r",["ifolder=","ofolder="])
+    except getopt.GetoptError:
+        print 'timelapse.py -i  -o  -r '
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'timelapse.py -i  -o  -r '
+            sys.exit()
+        elif opt in ("-i", "--ifolder"):
+            inputfolder = arg
+        elif opt in ("-o", "--ofolder"):
+            outputfolder = arg
+        elif opt == "-r":
+            process = 1
+
+    print 'Input folder is "', inputfolder
+    print 'Output folder is "', outputfolder        
+    if process==1:
+        deflickerRAW(inputfolder, outputfolder)      
+    initGUI(inputfolder, outputfolder)
+
+if __name__ == "__main__":
+    main(sys.argv[1:])</pre>
+
+  </div><a class="u-url" href="/2012/10/22/751/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Jordan Colburn</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Jordan Colburn</li><li><a class="u-email" href="mailto:jordancolburn@example.com">jordancolburn@example.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/jordancolburn"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">jordancolburn</span></a></li><li><a href="https://www.twitter.com/jordancolburn"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jordancolburn</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Personal website for Jordan Colburn. Software Development, Music, Electronics, Photography and Videography.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

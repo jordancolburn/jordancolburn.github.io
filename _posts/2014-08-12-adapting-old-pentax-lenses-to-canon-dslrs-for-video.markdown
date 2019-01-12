@@ -1,0 +1,15 @@
+---
+layout: post
+title: Adapting Old Pentax Lenses to Canon DSLRs for Video
+date: 2014-08-12 15:56:34
+categories: 
+permalink: /:year/:month/:day/:title/
+---
+<p><a href="/uploads/2014/08/video_equipment-1-of-2.jpg"><img class="alignnone size-large wp-image-940" src="/uploads/2014/08/video_equipment-1-of-2-1024x576.jpg" alt="video_equipment (1 of 2)" width="431" height="242" /></a></p>
+<p>As soon as you get an entry level DSLR, you are immediately attracted by all the lenses you can't afford. &nbsp;A great way build a diverse set of lenses for a very small amount of money is to adapt old manual focus lenses. &nbsp;Manual focus and manual aperture is great for video and useful for photography too if you don't mind taking the extra time.</p>
+<!--more-->
+<p>I use Canon DSLRs which are more picky than most cameras about which lenses you can adapt, but two mounts that I found work well are m42 and Pentax K mount. &nbsp;M42 lenses connect by screwing onto the mount and using a simple adapter, they can work great with crop and full frame cameras. &nbsp;K mount lock in similar to canon EF lenses, but will only work on crop sensors without modification. To make a K mount lens work on a full frame, use a diagonal cutter to cut off the lever and plastic guard that stick out of the back of the lens. Be sure to get it as close to flush as you can as even small amounts sticking up can block the mirror as it moves up. Also, hold the lens so falling debris falls to the floor and not onto the rear lens element as you trim the plastic and/or metal. All lenses have slightly different designs, but I was able to open up two of the lenses and remove the "clicked" ball limiting to aperture to set stops. &nbsp;This allows the aperture to smoothly change during a video shoot. &nbsp;This was different on all the lenses, and a little hard to put back together, so I wouldn't recommend it on a very nice lens that you care about.</p>
+<p>&nbsp;</p>
+<p><a href="/uploads/2014/07/10258058_10152406150994648_252936645554240932_n.jpg"><img class="alignnone wp-image-936 size-medium" src="/uploads/2014/07/10258058_10152406150994648_252936645554240932_n-300x200.jpg" alt="10258058_10152406150994648_252936645554240932_n" width="300" height="200" /></a></p>
+<p>&nbsp;</p>
+<p>Overall, prices and quality are very reasonable. &nbsp;I was able to get an 50mm f1.8, 80-200 f4 push-pull zoom, and 28mm f2.8 lens with a pentax film body at an estate sale for $30. &nbsp;I also got a very nice pentax 50mm f1.4 at a used camera shop for $65. &nbsp;In general, the lenses look better on full frame and show more flaws on a crop sensor, but they are more than sharp enough for 1080p video. For my wife's wedding video business, multiple shots with the vintage glass have made it into her final videos along side shots with newer Canon L series glass.</p>

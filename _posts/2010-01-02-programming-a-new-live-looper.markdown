@@ -1,0 +1,10 @@
+---
+layout: post
+title: Programming a New Live Looper
+date: 2010-01-02 22:10:00
+categories: 
+permalink: /:year/:month/:day/:title/
+---
+<div style="text-align: left;">After years of trying different looping software such as Ableton Live and other open source alternatives, I still haven't found anything that provides a seamless instrument-like experience. Last year, I tried to program my own alternative, Recursion Looper: <a href="http://www.jordancolburn.com/diy-music-projects/recursion-looper">http://www.jordancolburn.com/diy-music-projects/recursion-looper</a></div>
+<p>It works ok, but the functionality was a little too complex and finicky for live performance. I always liked the simplicity and reliability of hardware looping, but only having one main song section available really limits song possibilities. So I've again set out on programming my own solution. I like Ableton's Scenes and the ability to have different song sections, but I want the simplicity and immediate feel of the hardware pedal. I want to use combination of a pedal made out of a salvaged keyboard and the laptop keyboard to control the software. The functionality will be similar to having 4 separate loop pedals, with software logic to switch seamlessly between different sections and an overall mute control. After playing around some in Pure Data, I have a working demo of one section that provides looping, crossfading for smoother loops, overdubbing, 1 layer of undo (no redo), and 2 channel recording option (to allow only instrument looping while singing or vice versa). I'm working on getting out some bugs and perfecting the individual loop. When I get around to combining and get to the real exciting part of combining the four loops and momentary and latching mute, I will post an update.</p>
+<p><a href="/uploads/2010/01/picture1.png"><img class="alignnone size-full wp-image-479" title="picture1" src="/uploads/2010/01/picture1.png" alt="" width="504" height="315" /></a></p>

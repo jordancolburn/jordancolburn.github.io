@@ -1,0 +1,17 @@
+---
+layout: post
+title: Great DIY Speaker Stands for $30
+date: 2011-10-06 03:44:34
+categories: 
+permalink: /:year/:month/:day/:title/
+---
+<p>So you've just bought your first pair of studio monitors. &nbsp;You're obviously excited, but if you're like most people, you probably forgot the small detail of monitor stands. &nbsp;You options are to either improvise and sacrifice optimal placement (kind of ruining the reason you got the monitors in the first place) or go out and spend nearly $100 bucks on a low quality mass produced stand. &nbsp;I'm here to show you there's another option. &nbsp;You can build your own great looking and high quality speaker stands for around $30. &nbsp;Details after the break.</p>
+<p><a href="/uploads/2011/10/DSC_5286.jpg"><img class="alignnone size-large wp-image-356" title="DSC_5286" src="/uploads/2011/10/DSC_5286-680x1024.jpg" alt="" width="192" height="289" /></a>&nbsp;</p>
+<!--more-->
+<p>First of all, I'd like to thank my&nbsp;roommate, Adam Hall. &nbsp;He's amazing at projects like this and basically did most of the work while I stood around trying to be productive sanding and spray painting. &nbsp;He also is responsible for the great pictures of the finished project, the pictures of the process were done with our phones while working. I won't bore you with a step by step walkthrough, since this project is simple enough you should get a good idea just from looking through the picture gallery below. &nbsp;</p>
+<p>I'll give the materials used and a disjointed jumble of tips that we encountered and leave you to figure out how&nbsp;which&nbsp;details work best for you. Materials: 3" PVC, thread-rod (slightly longer than PVC), 8'x 12"x 2" board, 4 washers, 8 nuts to fit on thread rod, spray paint of chosen color, wood finish of choice, 60 lb bag of sand to fill PVC (probably only used 40 lbs worth), silicon caulk to keep sand from falling out the bottom (out design prevents much more of this than many others on the internet by sinking the PVC 1/2" into the wooden ends). The price can range from around $25 to $40 depending on how many materials like wood stain or caulk you have on hand. The pictures and captions should help clear up the rest.</p>
+<p><a href="/uploads/2011/10/06/great-diy-speaker-stands-for-30/attachment/0003/" rel="attachment wp-att-814"><img class="alignnone size-medium wp-image-814" src="/uploads/2011/10/0003-300x225.jpg" alt="0003" width="301" height="226" /></a></p>
+<p><a href="/uploads/2011/10/06/great-diy-speaker-stands-for-30/attachment/0005/" rel="attachment wp-att-815"><img class="alignnone size-medium wp-image-815" src="/uploads/2011/10/0005-300x225.jpg" alt="0005" width="300" height="225" /></a></p>
+<p><a href="/uploads/2011/10/06/great-diy-speaker-stands-for-30/attachment/0008/" rel="attachment wp-att-816"><img class="alignnone size-medium wp-image-816" src="/uploads/2011/10/0008-300x225.jpg" alt="0008" width="300" height="225" /></a></p>
+<p><a href="/uploads/2011/10/06/great-diy-speaker-stands-for-30/attachment/0009/" rel="attachment wp-att-817"><img class="alignnone size-medium wp-image-817" src="/uploads/2011/10/0009-225x300.jpg" alt="0009" width="225" height="300" /></a></p>
+<p><a href="/uploads/2011/10/06/great-diy-speaker-stands-for-30/attachment/0001/" rel="attachment wp-att-813"><img class="alignnone size-medium wp-image-813" src="/uploads/2011/10/0001-300x225.jpg" alt="0001" width="300" height="225" /></a></p>

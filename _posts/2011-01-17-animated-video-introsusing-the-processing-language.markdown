@@ -1,0 +1,15 @@
+---
+layout: post
+title: Animated Video Intros:Using the Processing Language
+date: 2011-01-17 22:27:37
+categories: 
+permalink: /:year/:month/:day/:title/
+---
+<p>In case you're not familiar with the programming language <a href="http://www.processing.org">processing</a>, let me fill you in.&nbsp; Processing is an open source programming language with an included IDE.&nbsp; Processing is a sketchbook&nbsp;geared toward quickly creating advanced visual art.</p>
+<p><a href="/uploads/2011/01/processingss.jpg"><img class="alignnone size-full wp-image-464" title="processingss" src="/uploads/2011/01/processingss.jpg" alt="" width="419" height="420" /></a></p>
+<p>In order to get better aquainted with processing, I decided to use it to help create a short intro animation for a youtube sports show some friends are working on.&nbsp; Processing comes with some great example sketches (programs), and it's a good idea to try out a few to get familiar with what the language is capable of.&nbsp; Processing is pretty user friendly if you've done any programming before.&nbsp; Right clicking a command and choosing "find in reference" will take you to a webpage with common uses and information about the command.</p>
+<!--more-->
+<p>After playing with a few of the example sketches, I decided I really like the 3D image demonstration "explode".&nbsp; It uses two for loops to go through every pixel in the image and plot them in 3D space.&nbsp; MouseX is multiplied by the brightness of each pixel so that when the mouseX is at it's minimum(mouse is all the way to the left),&nbsp; the image looks normal.&nbsp; But when mouseX is higher, the brighter pixels pop out and move toward the viewer. This was a very neat effect, but I wanted a little more control, so I used the "camera" command to map X and&nbsp;Z&nbsp;coordinants&nbsp;to mouseX and MouseY.&nbsp; This yields a unique effect where you can zoom in and rotate around the pixels that are in 3D space.&nbsp; The hardest part came when trying to set the presets in the camera command so that the logo used for the web intro would be displayed regular size and right side up when the mouse reaches the lower left hand corner. The final step was to include the commands to encode the output into a quicktime movie that I could import into iMovie. The following commands are what I used to combined my sketch and the MovieMaker example sketch.</p>
+<p><span style="text-decoration: underline;">In setup():</span>mm = new MovieMaker(this, width, height, "drawing.mov");</p>
+<p><span style="text-decoration: underline;">in draw() :</span> mm.addFrame();</p>
+<p><span style="text-decoration: underline;">in a subroutine after draw()</span> void keyPressed() { if (key == ' ') { // Finish the movie if space bar is pressed mm.finish(); // Quit running the sketch once the file is written exit(); } }</p>

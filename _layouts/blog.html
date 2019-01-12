@@ -14,11 +14,13 @@ layout: default
     <ul class="post-list">
       {%- for post in site.posts -%}
       <li>
+        {%- if post.image -%}
         <div class="image-wrapper">
             <a class="post-link" href="{{ post.url | relative_url }}">
             <img src="{{ post.image }}"></img>
             </a>
         </div>
+        {%- endif -%}
         {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
         <span class="post-meta">{{ post.date | date: date_format }}</span>
         <h3>
