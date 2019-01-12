@@ -1,0 +1,150 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../bower_components/neon-animation/neon-shared-element-animatable-behavior.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+
+<dom-module id="animated-grid">
+
+  <link rel="import" type="css" href="shared.css">
+
+  <style>
+
+    :host {
+      display: inline-block;      
+      background: #000;
+    }
+
+    .tile {
+      overflow: hidden;
+      display: inline-block;
+      float: left;
+      vertical-align: top;
+      width: calc(100% / 2);
+      height: calc(100% / 3);
+
+      @apply(--paper-font-title);
+      @apply(--layout-vertical);
+      @apply(--layout-center-center);
+    }
+    
+    .text-overlay {
+        position: absolute;
+        color: white;
+        background-color: rgba(0, 0, 0, .5);
+        width: 100%;
+        bottom: 0px;
+        text-align: center;
+    }
+    .tile:nth-of-type(2) {
+      width: calc(100% / 4);
+    }
+    .tile:nth-of-type(3) {
+      width: calc(100% / 4);
+    }
+    .tile:nth-of-type(4) {
+      height: calc(100% / 3 * 2);
+      width: calc(100% / 4);
+    }
+    .tile:nth-of-type(5) {
+      height: calc(100% / 3 * 2);
+      width: calc(100% / 4);
+    }
+    iron-image {
+        position: float;
+        width: 100%;
+        height: 100%;
+    }
+  </style>
+
+  <template>
+
+    <template is="dom-repeat" items="[[config]]">
+      <div class$="[[_computeTileClass('grey')]]">
+          <iron-image style="background-color: lightgray;"
+  sizing="cover" preload fade src="[[item.photo_url]]"> 
+          <div class="text-overlay">[[item.name]]</div>
+          </iron-image>
+      </div>
+    </template>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'animated-grid',
+
+    behaviors: [
+      Polymer.NeonSharedElementAnimatableBehavior
+    ],
+
+    properties: {
+
+      config: {
+        type: Array,
+        value: [], 
+      },
+
+      animationConfig: {
+        type: Object,
+        value: function() {
+          return {
+            'exit': [{
+              name: 'ripple-animation',
+              id: 'ripple',
+              fromPage: this
+            }, {
+              name: 'hero-animation',
+              id: 'hero',
+              fromPage: this
+            }]
+          }
+        }
+      }
+
+    },
+
+    listeners: {
+      click: '_onClick'
+    },
+
+    _computeTileClass: function(color) {
+      return 'tile ' + color + '-300';
+    },
+
+    _onClick: function(event) {
+      var target = event.target;
+      while (target !== this && !target._templateInstance) {
+        target = target.parentNode;
+      }
+
+      // configure the page animation
+      this.sharedElements = {
+        'hero': target,
+        'ripple': target
+      };
+      this.animationConfig['exit'][0].gesture = {
+        x: event.x || event.pageX,
+        y: event.y || event.pageY
+      };
+
+      this.fire('tile-click', {
+        tile: target,
+        data: target._templateInstance.item
+      });
+    }
+
+  });
+
+</script>

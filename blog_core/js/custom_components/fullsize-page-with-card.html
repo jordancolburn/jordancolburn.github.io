@@ -1,0 +1,200 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/neon-animation/neon-shared-element-animatable-behavior.html">
+
+
+<dom-module id="card-page">
+  <style>
+    #card_container {
+        width: 100%;
+    }
+
+    #card_name {
+        text-align: center;
+        padding: 20px;
+        color: #FFA500;
+        font-size: 200%;
+        width: 50%;
+        margin: 0 auto;
+    }
+
+    #card_content {
+        width: 70%;
+        margin: 0 auto;
+    }
+  </style>
+
+  <template>
+  <div id="card_container">
+    <div id="card_name">[[name]]</div>
+    <div id="card_content"></div>
+  </div>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'card-page',
+
+    properties: {
+      content: {
+          type: String,
+          observer: '_content_changed'
+      },
+
+      name: {
+        type: String
+      },
+    },
+
+    _content_changed: function() {
+        this.$.card_content.innerHTML = this.content;
+    },
+  });
+</script>
+
+
+<dom-module id="fullsize-page-with-card">
+
+  <link rel="import" type="css" href="shared.css">
+
+  <style>
+
+    :host {
+      display: block;
+    }
+
+    .fixed {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .card {
+      position: relative;
+      margin: 0px 0px 0;
+      height: 100%;
+    }
+  </style>
+
+  <template>
+
+    <div id="fixed" class$="[[_computeFixedBackgroundClass('grey')]]"></div>
+    <div id="card" class$="[[_computeCardClass('grey')]]">
+        <card-page content="[[content]]" name="[[name]]"></card-page>
+    </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'fullsize-page-with-card',
+
+    behaviors: [
+      Polymer.NeonSharedElementAnimatableBehavior
+    ],
+
+    properties: {
+
+      color: {
+        type: String
+      },
+
+      content: {
+          type: String,
+      },
+
+      name: {
+        type: String
+      },
+
+      img: {
+        type: String,
+      },
+
+      img_hidden: {
+        type: Boolean,
+      },
+
+      sharedElements: {
+        type: Object,
+        value: function() {
+          return {
+            'hero': this.$.card,
+            'ripple': this.$.fixed
+          }
+        }
+      },
+
+      animationConfig: {
+        type: Object,
+        value: function() {
+          return {
+            'entry': [{
+              name: 'ripple-animation',
+              id: 'ripple',
+              toPage: this,
+            }, {
+              name: 'hero-animation',
+              id: 'hero',
+              toPage: this,
+              timing: {
+                delay: 150
+              }
+            }],
+            'exit': [{
+              name: 'fade-out-animation',
+              node: this.$.fixed
+            }, {
+              name: 'transform-animation',
+              transformFrom: 'none',
+              transformTo: 'translate(0px,-200vh) scale(0.9,1)',
+              node: this.$.card
+            }]
+          }
+        }
+      }
+
+    },
+
+
+    _computeCardClass: function(color) {
+      var cls = 'card';
+      if (color) {
+        cls += ' ' + color + '-300';
+      }
+      return cls;
+    },
+
+    _computeFixedBackgroundClass: function(color) {
+      var cls = 'fixed';
+      if (color) {
+        cls += ' ' + color + '-100';
+      }
+      return cls;
+   },
+    listeners: {
+      'neon-animation-finish': '_onNeonAnimationFinish'
+    },
+    _onNeonAnimationFinish: function () {
+        this.img_hidden = False;
+    }
+
+  });
+
+</script>
+
+
