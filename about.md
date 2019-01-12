@@ -2,17 +2,11 @@
 layout: page
 title: About
 permalink: /about/
+published: true
 ---
+I have my Master's Degree in Electrical Engineering so of course I love designing and tinkering with hardware projects such as:
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
-
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
-
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
-
-[jekyll-organization]: https://github.com/jekyll
+Plasma Speaker
+DIY Preamps
+Analog Synth Modules
+Modifying, maintaining and breaking old tape machines, amps and consoles
