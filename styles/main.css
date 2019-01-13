@@ -5,3 +5,7 @@
 .site-header {
     border-top: none;
 }
+
+.card.fullsize-page-with-card {
+    overflow: scroll;
+}

@@ -3,6 +3,7 @@ layout: post
 title: Adjusting Aftertouch on a Korg Triton LE
 date: 2017-12-27 03:15:29
 categories: 
+image: /uploads/mce_filebrowser/2017/12/27/unnamed_2.jpg
 permalink: /:year/:month/:day/:title/
 ---
 <p>This all started when I recently played a Dave Smith Pro 2 in a music store and found it to be incredibly expressive. Specifically, the aftertouch was amazing and allowed me to really dig in and accent notes in a more expressive way similar to what I might do on a guitar.</p>

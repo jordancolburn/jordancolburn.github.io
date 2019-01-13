@@ -32,7 +32,7 @@ theme: minima
 plugins:
   - jekyll-feed
 exclude:
-  - blog_core
+  - static
 
 google_analytics: UA-26600255-1
 

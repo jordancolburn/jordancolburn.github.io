@@ -3,6 +3,7 @@ layout: post
 title: Repairing an Ampeg V4
 date: 2015-12-03 14:19:38
 categories: 
+image: /uploads/mce_filebrowser/2015/12/03/ampegv4-5.jpg
 permalink: /:year/:month/:day/:title/
 ---
 <div style="font-family: 'Helvetica Neue'; font-size: 14px;">I was taking out the trash a few weeks ago and spotted an unlikely item by our dumpster. It turns out that someone had thrown away an Ampeg V4 tube guitar head (my wife now gets me to take out the trash by insinuating that I might find a matching cab)!</div>

@@ -3,6 +3,7 @@ layout: post
 title: Quick Audio Mixing Tips for Video
 date: 2014-08-26 15:31:38
 categories: 
+image: /uploads/2014/07/audio-edit.png
 permalink: /:year/:month/:day/:title/
 ---
 <p><a href="/uploads/2014/07/audio-edit.png"><img class="alignnone size-large wp-image-937" src="/uploads/2014/07/audio-edit-1024x496.png" alt="audio edit" width="500" height="242" /></a>&nbsp;</p>

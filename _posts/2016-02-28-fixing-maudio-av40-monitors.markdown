@@ -3,6 +3,7 @@ layout: post
 title: Fixing Broken M-Audio AV40 Speakers
 date: 2016-02-28 21:34:17
 categories: 
+image: /uploads/mce_filebrowser/2016/02/28/IMG_20160228_005218.jpg
 permalink: /:year/:month/:day/:title/
 ---
 <p>I recently aqquired a set of M-Audio AV-40 powered speakers that had died without warning on their previous owner. The power light still turned on, but only the right speaker played some crackling audio. A lot of online sources mentioned various capacitors that might need to be replaced, so I figured I would open it up and try.</p>
