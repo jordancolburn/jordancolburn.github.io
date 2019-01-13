@@ -8,4 +8,31 @@
     {%- if jekyll.environment == 'production' and site.google_analytics -%}
     {%- include google-analytics.html -%}
     {%- endif -%}
+
+    <link rel="stylesheet" href="/styles/main.css">
+
+    {%- if page.layout == 'default' -%}
+        <script src="../static/blog_core/js/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+        <link rel="import" href="../static/blog_core/js/bower_components/paper-styles/paper-styles.html">
+        <link rel="import" href="../static/blog_core/js/bower_components/neon-animation/neon-animations.html">
+        <link rel="import" href="../static/blog_core/js/bower_components/neon-animation/neon-animated-pages.html">
+        <link rel="import" href="../static/blog_core/js/custom_components/animated-grid.html">
+        <link rel="import" href="../static/blog_core/js/custom_components/fullsize-page-with-card.html">
+        
+        <style>
+            body {
+                overflow: scrolling;
+            }
+        
+            .grid_container {
+                height: 525px;
+                width: 100%;
+            }
+        
+            neon-animated-pages {
+                height: 100%;
+            }
+        </style>
+    {%- endif -%}
+    
 </head>

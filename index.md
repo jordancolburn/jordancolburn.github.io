@@ -2,132 +2,29 @@
 layout: default
 published: true
 ---
-<script src="../blog_core/js/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
-<link rel="import" href="../blog_core/js/bower_components/paper-styles/paper-styles.html">
-<link rel="import" href="../blog_core/js/bower_components/neon-animation/neon-animations.html">
-<link rel="import" href="../blog_core/js/bower_components/neon-animation/neon-animated-pages.html">
-<link rel="import" href="../blog_core/js/custom_components/animated-grid.html">
-<link rel="import" href="../blog_core/js/custom_components/fullsize-page-with-card.html">
+<template is="dom-bind">
 
-<style>
-    body {
-    overflow: scrolling;
-    }
-    .grid_container{
-    height: 525px;
-    width: 100%;
-    }
-    neon-animated-pages {
-    height: 100%;
-    }
-</style>
-    
 <div class="grid_container fullbleed">
-      <neon-animated-pages id="pages" selected="0">
-        <animated-grid config="[{&quot;content&quot;: &quot;<p>I have my Master's Degree in Electrical Engineering so of course I love designing and tinkering with hardware projects such as:</p>\r\n<ul>\r\n<li><a title=\&quot;Plasma Speaker\&quot; href=\&quot;http://jordancolburn.com/2011/05/17/plasma-speaker/\&quot; target=\&quot;_blank\&quot;>Plasma Speaker</a></li>\r\n<li><a title=\&quot;DIY Mic Preamps\&quot; href=\&quot;http://jordancolburn.com/2010/07/03/getting-started-with-a-diy-mic-preampsc1-mk2/\&quot; target=\&quot;_blank\&quot;>DIY Preamps</a></li>\r\n<li>Analog Synth Modules</li>\r\n<li>Modifying, maintaining and breaking old tape machines, <a title=\&quot;amps\&quot; href=\&quot;http://jordancolburn.com/2015/12/03/repairing-ampeg-v4/\&quot; target=\&quot;_blank\&quot;>amps</a> and consoles</li>\r\n</ul>&quot;, &quot;name&quot;: &quot;hardware&quot;, &quot;photo_url&quot;: &quot;/uploads/mce_filebrowser/2015/11/25/hardware.jpg&quot;}, {&quot;content&quot;: &quot;<p>I am currently employed full-time as a web developer at Webconnex. I also have lots of half-baked hobby software projects:</p>\r\n<ul>\r\n<li>This website (A simple python CMS I made using django and google polymer web components)</li>\r\n<li><a title=\&quot;chord-it.com\&quot; href=\&quot;chord-it.com\&quot; target=\&quot;_blank\&quot;>chord-it.com</a>&amp;nbsp;(A site to find and share chords for songs, made as a single page angular web app using Google Firebase as the backend)</li>\r\n<li>Audio software (mostly variations on loopers using PD and Chuck)</li>\r\n<li>Embedded software for simple robots</li>\r\n<li>Tinkering with Magic Lantern software for expanding Canon Cameras</li>\r\n<li>Maintaining a variety of blogs and websites</li>\r\n</ul>&quot;, &quot;name&quot;: &quot;software&quot;, &quot;photo_url&quot;: &quot;https://lh4.googleusercontent.com/d-nJxjAsLs5BAuhRwe_gRKz6Girbc-e-mrvdwR99mF2mpf6ro4Icw_S4aazYg4HCHJaMCDg5pduzOWOWAXjtwCGMAI5OZuTuYS31J4YKofT_VE8BsQ&quot;}, {&quot;content&quot;: &quot;<p>For security, personal information such as my address has been removed, but please feel free email me at jordan.colburn@gmail.com to request a full resume or references. <iframe style=\&quot;width: 100%; height: 500px;\&quot; src=\&quot;http://docs.google.com/gview?url=jordancolburn.com/uploads/2015/02/Jordan_Colburn_Resume_web.pdf&amp;amp;embedded=true\&quot; frameborder=\&quot;0\&quot; width=\&quot;320\&quot; height=\&quot;240\&quot;></iframe><a href=\&quot;/uploads/2015/02/Jordan_Colburn_Resume_web.pdf\&quot;>Jordan_Colburn_Resume-web</a> &amp;nbsp;</p>&quot;, &quot;name&quot;: &quot;resume&quot;, &quot;photo_url&quot;: &quot;/uploads/mce_filebrowser/2015/11/25/resume.jpg&quot;}, {&quot;content&quot;: &quot;<p>I have always been fascinated by film and video production. Recently, I have gotten much more involved in video, mostly since my wife is a freelance videographer running her own business, <a href=\&quot;http://colburnvideo.com\&quot;>Colburn Video</a>. We work together on a lot of personal projects and videos for our church. &amp;nbsp;Check out some examples of our videos below and also check out my <a href=\&quot;http://www.youtube.com/user/musicskate0\&quot;>YouTube</a>&amp;nbsp;page for DIY videos, project updates and lots more.</p>\r\n<p style=\&quot;text-align: center;\&quot;>&amp;nbsp; <iframe src=\&quot;//player.vimeo.com/video/137190636\&quot; frameborder=\&quot;0\&quot; width=\&quot;500\&quot; height=\&quot;281\&quot;></iframe></p>\r\n<p><a href=\&quot;http://vimeo.com/137190636\&quot;>Campbellsville Football</a> from <a href=\&quot;http://vimeo.com/colburnvideo\&quot;>Colburn Video</a> on <a href=\&quot;https://vimeo.com\&quot;>Vimeo</a>.</p>&quot;, &quot;name&quot;: &quot;video&quot;, &quot;photo_url&quot;: &quot;/uploads/2014/07/audio-edit.png&quot;}, {&quot;content&quot;: &quot;<p>As much as I love talking about and making audio technology, I also like to actually make music with it. As a musician, I have experience performing, recording and mixing music in a wide variety of styles for myself and for others. This widget lets you preview my personal songs and purchase them directly from me through the secure Bandcamp online music store. Thanks for listening!</p>\r\n<p style=\&quot;text-align: center;\&quot;><iframe style=\&quot;border: 0; width: 400px; height: 340px;\&quot; src=\&quot;https://bandcamp.com/EmbeddedPlayer/album=2619729391/size=large/bgcol=ffffff/linkcol=0687f5/artwork=small/transparent=true/\&quot;><a href=\&quot;http://jordancolburn.bandcamp.com/album/right-to-repair\&quot;>Right to Repair by Jordan Colburn</a></iframe></p>&quot;, &quot;name&quot;: &quot;music&quot;, &quot;photo_url&quot;: &quot;/uploads/2013/10/10620362565_c0e4e6cdea_b-1.jpg&quot;}, {&quot;content&quot;: &quot;<!-- 500pxWidget -->\r\n<p>As my interest in video has grown, I've become more interested in still photography too. It's always fun for me to see the different mindsets required for video and photo. I also seem to only take photos of buildings and birds.</p>\r\n<p><a title=\&quot;https://500px.com/jordancolburn/\&quot; href=\&quot;https://500px.com/jordancolburn/\&quot; target=\&quot;_blank\&quot;>https://500px.com/jordancolburn/</a></p>&quot;, &quot;name&quot;: &quot;photo&quot;, &quot;photo_url&quot;: &quot;/uploads/2014/08/video_equipment-1-of-2-1024x576.jpg&quot;}, {&quot;content&quot;: &quot;<p>I love recording myself and singer-songwriters at my home studio. I also have had the opportunity to do some great live and location recordings.</p>\r\n<p>Listen to examples of songs I have recorded for other artists in the soundcloud widget below.</p>\r\n<p><iframe src=\&quot;https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/274748&amp;amp;color=ff5500&amp;amp;auto_play=false&amp;amp;hide_related=false&amp;amp;show_comments=true&amp;amp;show_user=true&amp;amp;show_reposts=false\&quot; frameborder=\&quot;no\&quot; scrolling=\&quot;no\&quot; width=\&quot;100%\&quot; height=\&quot;300\&quot;></iframe></p>&quot;, &quot;name&quot;: &quot;recording&quot;, &quot;photo_url&quot;: &quot;/uploads/mce_filebrowser/2015/11/25/recording.jpg&quot;}]" class="iron-selected x-scope animated-grid-0">
+<neon-animated-pages id="pages" selected="0">
 
-    
-      <div class="tile grey-300 style-scope animated-grid">
-          <iron-image style="background-color: lightgray; background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url(&quot;/uploads/mce_filebrowser/2015/11/25/hardware.jpg&quot;);" sizing="cover" preload="" fade="" class="style-scope animated-grid" role="img">
+<animated-grid on-tile-click="_onTileClick" config="[{&quot;content&quot;: &quot;<p>I have my Master's Degree in Electrical Engineering so of course I love designing and tinkering with hardware projects such as:</p>\r\n<ul>\r\n<li><a title=\&quot;Plasma Speaker\&quot; href=\&quot;http://jordancolburn.com/2011/05/17/plasma-speaker/\&quot; target=\&quot;_blank\&quot;>Plasma Speaker</a></li>\r\n<li><a title=\&quot;DIY Mic Preamps\&quot; href=\&quot;http://jordancolburn.com/2010/07/03/getting-started-with-a-diy-mic-preampsc1-mk2/\&quot; target=\&quot;_blank\&quot;>DIY Preamps</a></li>\r\n<li>Analog Synth Modules</li>\r\n<li>Modifying, maintaining and breaking old tape machines, <a title=\&quot;amps\&quot; href=\&quot;http://jordancolburn.com/2015/12/03/repairing-ampeg-v4/\&quot; target=\&quot;_blank\&quot;>amps</a> and consoles</li>\r\n</ul>&quot;, &quot;name&quot;: &quot;hardware&quot;, &quot;photo_url&quot;: &quot;/uploads/mce_filebrowser/2015/11/25/hardware.jpg&quot;}, {&quot;content&quot;: &quot;<p>I am currently employed full-time as a web developer at Webconnex. I also have lots of half-baked hobby software projects:</p>\r\n<ul>\r\n<li>This website (A simple python CMS I made using django and google polymer web components)</li>\r\n<li><a title=\&quot;chord-it.com\&quot; href=\&quot;chord-it.com\&quot; target=\&quot;_blank\&quot;>chord-it.com</a>&amp;nbsp;(A site to find and share chords for songs, made as a single page angular web app using Google Firebase as the backend)</li>\r\n<li>Audio software (mostly variations on loopers using PD and Chuck)</li>\r\n<li>Embedded software for simple robots</li>\r\n<li>Tinkering with Magic Lantern software for expanding Canon Cameras</li>\r\n<li>Maintaining a variety of blogs and websites</li>\r\n</ul>&quot;, &quot;name&quot;: &quot;software&quot;, &quot;photo_url&quot;: &quot;https://lh4.googleusercontent.com/d-nJxjAsLs5BAuhRwe_gRKz6Girbc-e-mrvdwR99mF2mpf6ro4Icw_S4aazYg4HCHJaMCDg5pduzOWOWAXjtwCGMAI5OZuTuYS31J4YKofT_VE8BsQ&quot;}, {&quot;content&quot;: &quot;<p>For security, personal information such as my address has been removed, but please feel free email me at jordan.colburn@gmail.com to request a full resume or references. <iframe style=\&quot;width: 100%; height: 500px;\&quot; src=\&quot;http://docs.google.com/gview?url=jordancolburn.com/uploads/2015/02/Jordan_Colburn_Resume_web.pdf&amp;amp;embedded=true\&quot; frameborder=\&quot;0\&quot; width=\&quot;320\&quot; height=\&quot;240\&quot;></iframe><a href=\&quot;/uploads/2015/02/Jordan_Colburn_Resume_web.pdf\&quot;>Jordan_Colburn_Resume-web</a> &amp;nbsp;</p>&quot;, &quot;name&quot;: &quot;resume&quot;, &quot;photo_url&quot;: &quot;/uploads/mce_filebrowser/2015/11/25/resume.jpg&quot;}, {&quot;content&quot;: &quot;<p>I have always been fascinated by film and video production. Recently, I have gotten much more involved in video, mostly since my wife is a freelance videographer running her own business, <a href=\&quot;http://colburnvideo.com\&quot;>Colburn Video</a>. We work together on a lot of personal projects and videos for our church. &amp;nbsp;Check out some examples of our videos below and also check out my <a href=\&quot;http://www.youtube.com/user/musicskate0\&quot;>YouTube</a>&amp;nbsp;page for DIY videos, project updates and lots more.</p>\r\n<p style=\&quot;text-align: center;\&quot;>&amp;nbsp; <iframe src=\&quot;//player.vimeo.com/video/137190636\&quot; frameborder=\&quot;0\&quot; width=\&quot;500\&quot; height=\&quot;281\&quot;></iframe></p>\r\n<p><a href=\&quot;http://vimeo.com/137190636\&quot;>Campbellsville Football</a> from <a href=\&quot;http://vimeo.com/colburnvideo\&quot;>Colburn Video</a> on <a href=\&quot;https://vimeo.com\&quot;>Vimeo</a>.</p>&quot;, &quot;name&quot;: &quot;video&quot;, &quot;photo_url&quot;: &quot;/uploads/2014/07/audio-edit.png&quot;}, {&quot;content&quot;: &quot;<p>As much as I love talking about and making audio technology, I also like to actually make music with it. As a musician, I have experience performing, recording and mixing music in a wide variety of styles for myself and for others. This widget lets you preview my personal songs and purchase them directly from me through the secure Bandcamp online music store. Thanks for listening!</p>\r\n<p style=\&quot;text-align: center;\&quot;><iframe style=\&quot;border: 0; width: 400px; height: 340px;\&quot; src=\&quot;https://bandcamp.com/EmbeddedPlayer/album=2619729391/size=large/bgcol=ffffff/linkcol=0687f5/artwork=small/transparent=true/\&quot;><a href=\&quot;http://jordancolburn.bandcamp.com/album/right-to-repair\&quot;>Right to Repair by Jordan Colburn</a></iframe></p>&quot;, &quot;name&quot;: &quot;music&quot;, &quot;photo_url&quot;: &quot;/uploads/2013/10/10620362565_c0e4e6cdea_b-1.jpg&quot;}, {&quot;content&quot;: &quot;<!-- 500pxWidget -->\r\n<p>As my interest in video has grown, I've become more interested in still photography too. It's always fun for me to see the different mindsets required for video and photo. I also seem to only take photos of buildings and birds.</p>\r\n<p><a title=\&quot;https://500px.com/jordancolburn/\&quot; href=\&quot;https://500px.com/jordancolburn/\&quot; target=\&quot;_blank\&quot;>https://500px.com/jordancolburn/</a></p>&quot;, &quot;name&quot;: &quot;photo&quot;, &quot;photo_url&quot;: &quot;/uploads/2014/08/video_equipment-1-of-2-1024x576.jpg&quot;}, {&quot;content&quot;: &quot;<p>I love recording myself and singer-songwriters at my home studio. I also have had the opportunity to do some great live and location recordings.</p>\r\n<p>Listen to examples of songs I have recorded for other artists in the soundcloud widget below.</p>\r\n<p><iframe src=\&quot;https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/274748&amp;amp;color=ff5500&amp;amp;auto_play=false&amp;amp;hide_related=false&amp;amp;show_comments=true&amp;amp;show_user=true&amp;amp;show_reposts=false\&quot; frameborder=\&quot;no\&quot; scrolling=\&quot;no\&quot; width=\&quot;100%\&quot; height=\&quot;300\&quot;></iframe></p>&quot;, &quot;name&quot;: &quot;recording&quot;, &quot;photo_url&quot;: &quot;/uploads/mce_filebrowser/2015/11/25/recording.jpg&quot;}]"> </animated-grid>
 
-    <img id="img" role="none" class="style-scope iron-image" hidden="">
-    <div id="placeholder" class="fit faded-out style-scope iron-image" style="background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
-     
-          <div class="text-overlay style-scope animated-grid">hardware</div>
-          
+<fullsize-page-with-card id="fullsize-card" hero-id="hero" on-click="_onFullsizeClick">
+</fullsize-page-with-card>
 
-  </iron-image>
-      </div>
-    
-      <div class="tile grey-300 style-scope animated-grid">
-          <iron-image style="background-color: lightgray; background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url(&quot;https://lh4.googleusercontent.com/d-nJxjAsLs5BAuhRwe_gRKz6Girbc-e-mrvdwR99mF2mpf6ro4Icw_S4aazYg4HCHJaMCDg5pduzOWOWAXjtwCGMAI5OZuTuYS31J4YKofT_VE8BsQ&quot;);" sizing="cover" preload="" fade="" class="style-scope animated-grid" role="img">
-
-    <img id="img" role="none" class="style-scope iron-image" hidden="">
-    <div id="placeholder" class="fit faded-out style-scope iron-image" style="background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
-     
-          <div class="text-overlay style-scope animated-grid">software</div>
-          
-
-  </iron-image>
-      </div>
-    
-      <div class="tile grey-300 style-scope animated-grid">
-          <iron-image style="background-color: lightgray; background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url(&quot;/uploads/mce_filebrowser/2015/11/25/resume.jpg&quot;);" sizing="cover" preload="" fade="" class="style-scope animated-grid" role="img">
-
-    <img id="img" role="none" class="style-scope iron-image" hidden="">
-    <div id="placeholder" class="fit faded-out style-scope iron-image" style="background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
-     
-          <div class="text-overlay style-scope animated-grid">resume</div>
-          
-
-  </iron-image>
-      </div>
-    
-      <div class="tile grey-300 style-scope animated-grid">
-          <iron-image style="background-color: lightgray; background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url(&quot;/uploads/2014/07/audio-edit.png&quot;);" sizing="cover" preload="" fade="" class="style-scope animated-grid" role="img">
-
-    <img id="img" role="none" class="style-scope iron-image" hidden="">
-    <div id="placeholder" class="fit faded-out style-scope iron-image" style="background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
-     
-          <div class="text-overlay style-scope animated-grid">video</div>
-          
-
-  </iron-image>
-      </div>
-    
-      <div class="tile grey-300 style-scope animated-grid">
-          <iron-image style="background-color: lightgray; background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url(&quot;/uploads/2013/10/10620362565_c0e4e6cdea_b-1.jpg&quot;);" sizing="cover" preload="" fade="" class="style-scope animated-grid" role="img">
-
-    <img id="img" role="none" class="style-scope iron-image" hidden="">
-    <div id="placeholder" class="fit faded-out style-scope iron-image" style="background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
-     
-          <div class="text-overlay style-scope animated-grid">music</div>
-          
-
-  </iron-image>
-      </div>
-    
-      <div class="tile grey-300 style-scope animated-grid">
-          <iron-image style="background-color: lightgray; background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url(&quot;/uploads/2014/08/video_equipment-1-of-2-1024x576.jpg&quot;);" sizing="cover" preload="" fade="" class="style-scope animated-grid" role="img">
-
-    <img id="img" role="none" class="style-scope iron-image" hidden="">
-    <div id="placeholder" class="fit faded-out style-scope iron-image" style="background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
-     
-          <div class="text-overlay style-scope animated-grid">photo</div>
-          
-
-  </iron-image>
-      </div>
-    
-      <div class="tile grey-300 style-scope animated-grid">
-          <iron-image style="background-color: lightgray; background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url(&quot;/uploads/mce_filebrowser/2015/11/25/recording.jpg&quot;);" sizing="cover" preload="" fade="" class="style-scope animated-grid" role="img">
-
-    <img id="img" role="none" class="style-scope iron-image" hidden="">
-    <div id="placeholder" class="fit faded-out style-scope iron-image" style="background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
-     
-          <div class="text-overlay style-scope animated-grid">recording</div>
-          
-
-  </iron-image>
-      </div>
-    <template is="dom-repeat" class="style-scope animated-grid"></template>
-
-  </animated-grid>
-
-        <fullsize-page-with-card id="fullsize-card" hero-id="hero" class="x-scope fullsize-page-with-card-0">
-
-    <div id="fixed" class="fixed grey-100 style-scope fullsize-page-with-card"></div>
-    <div id="card" class="card grey-300 style-scope fullsize-page-with-card">
-        <card-page class="style-scope fullsize-page-with-card">
-  <div id="card_container" class="style-scope card-page">
-    <div id="card_name" class="style-scope card-page"> </div>
-    <div id="card_content" class="style-scope card-page"></div>
-  </div>
-  </card-page>
-    </div>
-
-  </fullsize-page-with-card>
-
-      
-  </neon-animated-pages>
+</neon-animated-pages>
 </div>
+
+</template>
+
+<script>
+    var scope = document.querySelector('template[is="dom-bind"]');
+    scope._onTileClick = function(event) {
+    this.$['fullsize-card'].name = event.detail.data.name;
+    this.$['fullsize-card'].content = event.detail.data.content;
+    this.$.pages.selected = 1;
+    };
+    scope._onFullsizeClick = function(event) {
+    this.$.pages.selected = 0;
+    };
+</script>
