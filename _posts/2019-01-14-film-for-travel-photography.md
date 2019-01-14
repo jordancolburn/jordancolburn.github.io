@@ -1,7 +1,7 @@
 ---
 published: false
 layout: post
-date: 2019-01-14T19:52:14.000Z
+date: 2019-01-14T08:52:14.000Z
 image: /uploads/2019/Sac-SF (24 of 67).jpg
 permalink: '/:year/:month/:day/:title/'
 ---
@@ -28,4 +28,4 @@ Think about when/what you will be doing and choose appropriate color/ISO options
 I like to pair a super small rangefinder (Ricoh 500g) with a larger DSLR (Pentax K1000). This way, one camera can have color film, and the other can have black and white. My wife and I both like to take photos, so this gives us each a camera nearby, or we can leave the larger camera in the hotel room for quicker day trips and still get great photos from the rangefinder.
 
 5. Just Do It
-If you're like most photographers these days, you will feel like you're missing out by not bringing your expensive and bulky dslr, along with 10 different lenses. However, just try travelling with a film camera, one prime lens and gurantee you will have a lot of fun 
+If you're like most photographers these days, you will feel like you're missing out by not bringing your expensive and bulky dslr, along with 10 different lenses. However, just try travelling with a film camera, one prime lens and gurantee you will have a lot of fun
