@@ -1,7 +1,7 @@
 ---
 published: true
 layout: post
-date: {}
+date: '2019-01-18 11:30:00 +0500.'
 image: /uploads/2019/Sac-SF (24 of 67).jpg
 permalink: '/:year/:month/:day/:title/'
 ---
