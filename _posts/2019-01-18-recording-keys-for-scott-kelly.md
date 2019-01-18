@@ -31,4 +31,5 @@ Additional keys on the album include my Fender Rhodes electric piano run through
 
 Overall, I had a blast making this record and I'm really happy how it turned out!
 
+![LadyMercyRecording-5.jpg]({{site.baseurl}}/uploads/2019/LadyMercyRecording-5.jpg)
 
