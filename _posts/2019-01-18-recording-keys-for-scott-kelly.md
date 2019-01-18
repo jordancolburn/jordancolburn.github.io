@@ -16,11 +16,14 @@ Today is the official album release show for the band I've been playing with, Sc
 
 Most of the base tracks were recorded at Deadbird Studios here in Louisville, KY (http://deadbirdrecording.com). Prior to recording, we had played a few shows and done a ton of practice to work out the arrangements. The base tracks for most of the songs were done as a full band with drums, bass, guitar, keys and scratch vocals live without a click. Over a handful of sessions, we did a few takes of each song (to pro tools, not tape) until we were happy with a take. Then guitar, additional keys and vocals were overdubbed or replaced to fill out the arrangement.
 
+![Screen Shot 2019-01-18 at 3.33.14 PM.png]({{site.baseurl}}/uploads/2019/Screen Shot 2019-01-18 at 3.33.14 PM.png)
 
 
 
 
 The main key setup was a Hammond L100 organ (Scott's organ, but basically identical to my L100) run through a singler speaker leslie that was puller from another hammond spinet organ. This speaker had a long ramp up/down time and gave a unique sound to more traditional leslies. I had to custom make a speed controller for it out of an old guitar pedal. I also had a Korg Minilogue for leads on "Broken Heart" and a Yamaha reface EP that was just used on scratch tracks and didn't make it into the final recordings.
+
+
 
 The piano heavy songs "The Way It Goes" and "Out of Line" were tracked with full band and an upright piano in the studio. The drum bleed was pretty significant in these tracks, so we were really comitting to the base tracks here.
 
