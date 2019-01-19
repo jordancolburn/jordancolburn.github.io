@@ -2,7 +2,7 @@
 published: true
 layout: post
 date: '2019-01-18 11:30:00 +0500.'
-image: /uploads/2019/Sac-SF (24 of 67).jpg
+image: /uploads/2019/Screen Shot 2019-01-18 at 3.33.14 PM.png
 permalink: '/:year/:month/:day/:title/'
 ---
 ## Recording Keys for Scott Kelly and the Lady Mercy
@@ -32,4 +32,3 @@ Additional keys on the album include my Fender Rhodes electric piano run through
 Overall, I had a blast making this record and I'm really happy how it turned out!
 
 ![LadyMercyRecording-13.jpg]({{site.baseurl}}/uploads/2019/LadyMercyRecording-13.jpg)
-
