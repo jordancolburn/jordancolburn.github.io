@@ -1,5 +1,5 @@
 ---
-published: false
+published: true
 layout: post
 date: '2019-02-06 11:30:00 +0500.'
 image: /assets/2019/Screen%20Shot%202019-02-06%20at%201.45.29%20PM.png
