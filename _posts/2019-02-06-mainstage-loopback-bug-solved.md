@@ -10,7 +10,7 @@ permalink: '/:year/:month/:day/:title/'
 ![Screen Shot 2019-02-06 at 1.45.29 PM.png]({{site.baseurl}}/assets/2019/Screen Shot 2019-02-06 at 1.45.29 PM.png)
 
 
-For years, I've always loved looping in Apple's Mainstage. The combination of unlimited loopers, groups and flexible effects and routing is great. However there has been a persistent "bug" that has bothered me for a long time. Occasionaly, when recording an initial loop and pressing the record button again to stop it and overdub from the beginning, it starts to erase my initial loop instead of overdubbing. 
+For years, I've always loved looping in Apple's Mainstage. The combination of unlimited loopers, groups and flexible effects and routing is great. However there has been a persistent "bug" that has bothered me for a long time. Occasionally, when recording an initial loop and pressing the record button again to stop it and overdub from the beginning, it starts to erase my initial loop instead of overdubbing. 
 
 I tried everything, from verifying all my settings to saving, updating and starting from scratch, but it just seemed like the bug would only happen sometimes and I could never correlate any cause to the effect.
 
