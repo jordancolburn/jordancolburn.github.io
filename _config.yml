@@ -14,14 +14,14 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: Jordan Colburn
-email: jordancolburn@example.com
+email: jordancolburn@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   Personal website for Jordan Colburn.
   Software Development, Music, Electronics, Photography and Videography.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jordancolburn
-github_username:  jordancolburn
+github_username: jordancolburn
 
 collections:
   - about_me_topics
@@ -33,7 +33,6 @@ plugins:
   - jekyll-feed
 
 google_analytics: UA-26600255-1
-
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
 # to override the default setting.
