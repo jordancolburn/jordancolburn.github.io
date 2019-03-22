@@ -2,13 +2,19 @@
 layout: post
 title: Live Looping in Mainstage
 date: 2015-07-31 07:13:54
-categories: 
+categories:
 permalink: /:year/:month/:day/:title/
 ---
+
 <p><iframe src="https://www.youtube.com/embed/oVxLzfovwSY" frameborder="0" width="560" height="315"></iframe></p>
 <p>&nbsp;</p>
 <hr />
-<p><strong>Update:</strong>&nbsp;I now offer a service to create a custom looping template for your needs. For $100, I will work with you to build the perfect loops/routing/effects so you can focus on a great performance and not on googling mainstage setup tips.</p>
+<p><strong>Update:</strong>&nbsp;I now offer free and premium templates to help you get started looping in Mainstage. They demonstrate all the tips (and more) that I talk about in the article below.
+</p>
+
+<a href="/templates">Click here for to download</a>
+
+<p>I also offer a service to create a custom looping template for your needs. For $100, I will work with you to build the perfect loops/routing/effects so you can focus on a great performance and not on googling mainstage setup tips.</p>
 <p>Email jordancolburn@gmail.com for any questions or use the buy now below to place an order and send me your description of your ideal setup.</p>
 <div style="text-align: center;"><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input type="hidden" name="cmd" value="_s-xclick" /> <input type="hidden" name="hosted_button_id" value="WDDVZC8WBK7CE" /> <input type="image" name="submit" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif" alt="PayPal - The safer, easier way to pay online!" /> <img src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" alt="" width="1" height="1" border="0" /></form></div>
 <p>&lt;/self-promotion&gt;&nbsp;</p>
