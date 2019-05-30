@@ -2,10 +2,12 @@
 layout: post
 title: Teaching Code
 date: 2016-08-29 14:48:45
-categories: 
+categories:
 permalink: /:year/:month/:day/:title/
 ---
-<div><span>I recently had the opportunity to tutor a kid from church in "coding". Considering that software development was always something I learned myself or on the job, I wasn't sure how well I would be able to teach it, but I think I came up with a good approach that helped him learn a lot of a few 1 hour sessions this summer.</span></div>
+
+<div><span>I recently had the opportunity to tutor a kid from church in "coding". Considering that software development was always something I learned myself or on the job, I wasn't sure how well I would be able to teach it, but I think I came up with a good approach that helped him learn a lot of a few 1 hour sessions this summer. Try the final version of the game he created <a href="/js-game">HERE</a></span></div>
+<br/>
 <div><span>&nbsp;</span></div>
 <div><span>I wanted to keep the lessons fun, practical and helpful should he decide to dive deeper into programming later on (he's in 7th grade and has had some small programming experience in the past). I settled on teaching web development (HTML, CSS, and JS) to build simple websites and games.</span></div>
 <div><span>&nbsp;</span></div>
