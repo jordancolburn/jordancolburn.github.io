@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Simple JS Game
 permalink: /js-game/
+noFooter: true
 ---
 
 <div class="game" />
