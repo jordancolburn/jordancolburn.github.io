@@ -1,7 +1,7 @@
 ---
 published: true
 layout: post
-date: "2019-03-05 08:30:00 +0500."
+date: "2020-03-05 08:30:00 +0500."
 permalink: "/:year/:month/:day/:title/"
 ---
 
