@@ -1,5 +1,4 @@
 import os
-import re
 from datetime import datetime
 
 SITE_DIR = 'site'
