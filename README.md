@@ -1,8 +1,11 @@
-- Requires Ruby 3.2 or newer. Install Bundler and Jekyll with:
-  `gem install bundler jekyll`
-  Then run:
-  `bundle install`
-  `bundle exec jekyll serve`
+This repository contains the sources for jordancolburn.com.
 
-- To release
-  push to master, build is done through github pages
+# Building locally
+
+A small Python script is provided so the site can be built without Ruby or third party dependencies. Run:
+
+```bash
+python3 scripts/build.py
+```
+
+The generated site will appear in the `site/` directory. Simply open `site/index.html` in a browser or serve the folder with any static file server.
