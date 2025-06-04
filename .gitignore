@@ -1,4 +1,9 @@
 jordancolburn.com
 _site
+
 .ruby-version
 Gemfile*
+
+site/
+__pycache__/
+
