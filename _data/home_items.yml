@@ -1,37 +1,44 @@
 - name: hardware
   image: /uploads/mce_filebrowser/2015/11/25/hardware.jpg
+  orientation: vertical
   content: >-
     I have my Master's Degree in Electrical Engineering, so I love designing
     and tinkering with hardware projects such as plasma speakers, DIY preamps,
     analog synth modules, and repairing vintage tape machines and amps.
 - name: software
   image: https://lh4.googleusercontent.com/d-nJxjAsLs5BAuhRwe_gRKz6Girbc-e-mrvdwR99mF2mpf6ro4Icw_S4aazYg4HCHJaMCDg5pduzOWOWAXjtwCGMAI5OZuTuYS31J4YKofT_VE8BsQ
+  orientation: horizontal
   content: >-
     I'm a web developer with many hobby software projects including this
     website, audio tools, embedded robotics and more.
 - name: resume
   image: /uploads/mce_filebrowser/2015/11/25/resume.jpg
+  orientation: vertical
   content: >-
     For security, personal information has been removed. Email me at
     jordan.colburn@gmail.com for a full resume.
     <a href="/uploads/2015/02/Jordan_Colburn_Resume_web.pdf">Download PDF</a>.
 - name: video
   image: /uploads/2014/07/audio-edit.png
+  orientation: horizontal
   content: >-
     I work with my wife at <a href="http://colburnvideo.com">Colburn Video</a>
     on various projects. Check out more on our <a href="https://vimeo.com/colburnvideo">Vimeo</a> page.
 - name: music
   image: /uploads/2013/10/10620362565_c0e4e6cdea_b-1.jpg
+  orientation: vertical
   content: >-
     I enjoy making music. Listen to my album
     <a href="http://jordancolburn.bandcamp.com/album/right-to-repair">Right to Repair</a>.
 - name: photo
   image: /uploads/2014/08/video_equipment-1-of-2-1024x576.jpg
+  orientation: horizontal
   content: >-
     I'm also an avid photographer. See some of my photos on
     <a href="https://500px.com/jordancolburn/">500px</a>.
 - name: recording
   image: /uploads/mce_filebrowser/2015/11/25/recording.jpg
+  orientation: vertical
   content: >-
     I love recording at my home studio and on location.
     Listen on <a href="https://soundcloud.com/jordancolburn">SoundCloud</a>.

@@ -5,7 +5,7 @@ layout: default
 <div class="home-grid">
   <div class="grid">
     {%- for item in site.data.home_items -%}
-    <div class="grid-item">
+    <div class="grid-item {{ item.orientation }}">
       <img src="{{ item.image }}" alt="{{ item.name }}">
       <h3>{{ item.name }}</h3>
       <div class="item-content" hidden>
@@ -30,9 +30,16 @@ layout: default
     const modalTitle = document.getElementById('modal-title');
     const modalBody = document.getElementById('modal-body');
     const closeBtn = modal.querySelector('.close');
+    const modalContent = modal.querySelector('.modal-content');
 
     document.querySelectorAll('.grid-item').forEach(function(item) {
       item.addEventListener('click', function() {
+        const rect = item.getBoundingClientRect();
+        const originX = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
+        const originY = ((rect.top + rect.height / 2) / window.innerHeight) * 100;
+        modalContent.style.setProperty('--origin-x', originX + 'vw');
+        modalContent.style.setProperty('--origin-y', originY + 'vh');
+
         modalTitle.textContent = item.querySelector('h3').textContent;
         modalBody.innerHTML = item.querySelector('.item-content').innerHTML;
         modal.classList.add('open');
