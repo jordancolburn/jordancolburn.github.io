@@ -1,6 +1,6 @@
 - name: hardware
   image: /uploads/mce_filebrowser/2015/11/25/hardware.jpg
-  orientation: vertical
+  orientation: large
   content: >-
     I have my Master's Degree in Electrical Engineering, so I love designing
     and tinkering with hardware projects such as plasma speakers, DIY preamps,
@@ -32,7 +32,7 @@
     <a href="http://jordancolburn.bandcamp.com/album/right-to-repair">Right to Repair</a>.
 - name: photo
   image: /uploads/2014/08/video_equipment-1-of-2-1024x576.jpg
-  orientation: horizontal
+  orientation: large
   content: >-
     I'm also an avid photographer. See some of my photos on
     <a href="https://500px.com/jordancolburn/">500px</a>.
