@@ -44,6 +44,8 @@
     Listen on <a href="https://soundcloud.com/jordancolburn">SoundCloud</a>.
 - name: 3d printing
   image: /uploads/2013/10/IMG_1563.jpg
-  orientation: horizontal
+  orientation: vertical
   content: >-
-    I often 3D print parts for my electronics and robotics projects.
+    I sew my own gear (MYOG) for outdoor adventures, creating tents,
+    quilts and backpacks with a blend of 3D printed parts and
+    traditional stitching.
