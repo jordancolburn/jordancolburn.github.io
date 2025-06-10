@@ -9,3 +9,102 @@
 .card.fullsize-page-with-card {
     overflow: scroll;
 }
+/* Home grid styles */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-auto-rows: 150px;
+    grid-auto-flow: dense;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.grid-item {
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+    overflow: hidden;
+}
+
+.grid-item .item-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+    text-shadow: 0 0 5px #000;
+}
+
+.grid-item:hover .item-label {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.grid-item img {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    object-fit: cover;
+    object-position: center;
+}
+
+.grid-item.vertical {
+    grid-row: span 2;
+}
+
+.grid-item.horizontal {
+    grid-column: span 2;
+}
+
+.grid-item.large {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.open {
+    display: block;
+    opacity: 1;
+}
+
+.modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    background: #fff;
+    width: 80vw;
+    max-width: 600px;
+    height: 70vh;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 1rem;
+    border-radius: 8px;
+    transform: translate(-50%, -50%) scale(0);
+    transform-origin: var(--origin-x) var(--origin-y);
+    transition: transform 0.3s ease;
+}
+
+.close {
+    float: right;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal.open .modal-content {
+    transform: translate(-50%, -50%) scale(1);
+}
