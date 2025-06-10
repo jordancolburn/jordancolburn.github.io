@@ -7,7 +7,7 @@ layout: default
     {%- for item in site.data.home_items -%}
     <div class="grid-item {{ item.orientation }}">
       <img src="{{ item.image }}" alt="{{ item.name }}">
-      <h3>{{ item.name }}</h3>
+      <div class="item-label">{{ item.name }}</div>
       <div class="item-content" hidden>
         {{ item.content }}
       </div>
@@ -40,7 +40,7 @@ layout: default
         modalContent.style.setProperty('--origin-x', originX + 'vw');
         modalContent.style.setProperty('--origin-y', originY + 'vh');
 
-        modalTitle.textContent = item.querySelector('h3').textContent;
+        modalTitle.textContent = item.querySelector('.item-label').textContent;
         modalBody.innerHTML = item.querySelector('.item-content').innerHTML;
         modal.classList.add('open');
       });

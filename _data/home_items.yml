@@ -42,3 +42,8 @@
   content: >-
     I love recording at my home studio and on location.
     Listen on <a href="https://soundcloud.com/jordancolburn">SoundCloud</a>.
+- name: 3d printing
+  image: /uploads/2013/10/IMG_1563.jpg
+  orientation: horizontal
+  content: >-
+    I often 3D print parts for my electronics and robotics projects.

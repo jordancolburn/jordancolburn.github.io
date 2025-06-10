@@ -20,8 +20,27 @@
 }
 
 .grid-item {
+    position: relative;
     cursor: pointer;
     text-align: center;
+    overflow: hidden;
+}
+
+.grid-item .item-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+    text-shadow: 0 0 5px #000;
+}
+
+.grid-item:hover .item-label {
+    transform: translate(-50%, -50%) scale(1.1);
 }
 
 .grid-item img {
