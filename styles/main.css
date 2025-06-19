@@ -24,7 +24,43 @@
     cursor: pointer;
     text-align: center;
     overflow: hidden;
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+    animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                box-shadow 0.3s ease;
 }
+
+
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+
+.grid-item:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.grid-item:nth-child(1) { animation-delay: 0.1s; }
+.grid-item:nth-child(2) { animation-delay: 0.2s; }
+.grid-item:nth-child(3) { animation-delay: 0.3s; }
+.grid-item:nth-child(4) { animation-delay: 0.4s; }
+.grid-item:nth-child(5) { animation-delay: 0.5s; }
+.grid-item:nth-child(6) { animation-delay: 0.6s; }
+.grid-item:nth-child(7) { animation-delay: 0.7s; }
+.grid-item:nth-child(8) { animation-delay: 0.8s; }
+.grid-item:nth-child(9) { animation-delay: 0.9s; }
+.grid-item:nth-child(n+10) { animation-delay: 1s; }
 
 .grid-item .item-label {
     position: absolute;
@@ -71,15 +107,18 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0);
     z-index: 100;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    backdrop-filter: blur(0px);
 }
 
 .modal.open {
     display: block;
     opacity: 1;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
 }
 
 .modal-content {
@@ -94,17 +133,44 @@
     overflow-y: auto;
     padding: 1rem;
     border-radius: 8px;
-    transform: translate(-50%, -50%) scale(0);
-    transform-origin: var(--origin-x) var(--origin-y);
-    transition: transform 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    transform: translate(-50%, -50%) scale(0.7) rotateX(15deg);
+    transform-origin: var(--origin-x, 50vw) var(--origin-y, 50vh);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                opacity 0.3s ease 0.1s;
+    opacity: 0;
 }
 
 .close {
     float: right;
     font-size: 1.5rem;
     cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close:hover {
+    transform: scale(1.1) rotate(90deg);
+    color: #ff4444;
 }
 
 .modal.open .modal-content {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%) scale(1) rotateX(0deg);
+    opacity: 1;
+}
+
+#modal-title {
+    width: 100%;
+    text-align: center;
+}
+
+#modal-body {
+    height: 80%;
+    text-align: center;
+    padding-top: 25px;
 }

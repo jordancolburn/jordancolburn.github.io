@@ -17,9 +17,11 @@ layout: default
 
   <div id="modal" class="modal">
     <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2 id="modal-title"></h2>
-      <div id="modal-body"></div>
+        <span class="close">&times;</span>
+        <h2 id="modal-title">Modal Title</h2>
+        <div id="modal-body">
+            <!-- Your centered content goes here -->
+        </div>
     </div>
   </div>
 </div>
