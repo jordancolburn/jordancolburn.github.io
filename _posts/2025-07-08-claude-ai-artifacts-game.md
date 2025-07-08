@@ -23,7 +23,7 @@ The prompts were:
 * "Add a drowning animation if the ring isn't hit"
 
 
-The "AI Unhelpful Valley", as I call it, soon appeared though—after the fast start, Claude struggled to refine the game logic. I repeatedly asked it to adjust the collision detection but it kept assuming three rigid states (success, hitting the ring, or drowning) and mixed the X and Y positions when only the X coordinate mattered.
+The "AI Unhelpful Valley", as I call it, soon appeared though—after the fast start. AI to me seems great at quick prototpyes and refining established ideas, but often seems to struggle in the middle ground of taking it's own ideas into finished products. Claude struggled to refine the game logic. I repeatedly asked it to adjust the collision detection but it kept assuming three rigid states (success, hitting the ring, or drowning) and mixed the X and Y positions when only the X coordinate mattered.
 
 After dozens of prompts I finally downloaded the artifact code and made the fixes to the collision detection code manually. Five minutes of hands–on coding resolved the main issues. Being able to directly update the code was a huge help, especially after Claude seemed to cache old versions and insist it had used my latest changes.
 
