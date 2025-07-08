@@ -25,9 +25,9 @@ The prompts were:
 * "Add a drowning animation if the ring isn't hit"
 
 
-The "AI Unhelpful Valley", as I call it, soon appeared after the fast start. AI (to me at least) seems great at quick prototpyes and refining established ideas, but often seems to struggle in the middle ground of taking it's own ideas into finished products. Claude struggled to refine the game logic. I repeatedly asked it to adjust the collision detection but it kept assuming three rigid states (success, hitting the ring, or drowning) and mixed the X and Y positions when only the X coordinate mattered.
+The "AI Unhelpful Valley", as I call it, soon appeared after the fast start. AI (to me at least) seems great at quick prototpyes and refining established ideas, but often seems to struggle in the middle ground of taking it's own ideas into finished products. Claude struggled to refine the game logic. I repeatedly asked it to adjust the collision detection but it kept assuming three rigid states (success, hitting the ring, or drowning) and mixed the X and Y positions when only the X coordinate mattered to this use case.
 
-After dozens of prompts I finally downloaded the artifact code and made the fixes to the collision detection code manually. Five minutes of hands–on coding resolved the main issues. Being able to directly update the code was a huge help, especially after Claude seemed to cache old versions and insist it had used my latest changes.
+After dozens of prompts I finally downloaded the artifact code and made the fixes to the collision detection code manually. Five minutes of hands–on coding resolved the main issues. It was pretty interesting to jump into an unfamiliar code base that was the result of something I just helped create using plain text. Being able to directly update the code was a huge help, especially after Claude seemed to cache old versions and insist it had used my latest changes.
 
 
 ![ai-diff.png]({{site.baseurl}}/assets/ai-diff.png)
@@ -39,4 +39,6 @@ Here is the final playable artifact:
 
 <p class="text-center"><a href="https://claude.ai/public/artifacts/444dae0c-7393-4e9a-a8e5-3ed762beb185">Open the final artifact on Claude.ai</a></p>
 
-Overall I was impressed with how quickly Claude generated a starting point, but it still takes real development and debugging time to polish the logic to make something actually usable. If you hit a wall with the AI, don’t be afraid to dive into the code yourself.
+Overall I was impressed with how quickly Claude generated a starting point, but it still took real development and debugging time to polish the logic to make something actually usable. With AI, I remain amazed at some of the things it can do quickly on it's own, but equally surprised at some of the small issues that can cause it to get stuck.
+
+Full Disclosure: I took notes and screenshots while making the game, gave the to chatGPT Codex along and asked it to make this blog post for me (it even opened the PR to my personal blog!). Again, It got really close to what I wanted but it still required pulling down that branch and adjusting tone and other fixes too. Going forward, I really am seeking AI tooling that lets agents do a lot of the work, but allows for quick manual fixes and feedback to keep it on task and allow myself to remain in the loop and not just a passive approver of the code it generates.
