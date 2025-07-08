@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Springy Stick Figure Diving Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 10px;
+      background: linear-gradient(135deg, #87CEEB 0%, #98D8E8 50%, #B0E0E6 100%);
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      touch-action: manipulation;
+    }
+
+    h1 {
+      color: #2C5530;
+      margin: 5px 0;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      font-size: clamp(1.2rem, 4vw, 2rem);
+      text-align: center;
+    }
+
+    #gameContainer {
+      position: relative;
+      border: 3px solid #2C5530;
+      border-radius: 10px;
+      background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 60%, #4682B4 60%, #1E90FF 100%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      max-width: 100vw;
+      overflow: hidden;
+    }
+
+    #gameCanvas {
+      display: block;
+      cursor: crosshair;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .controls {
+      margin: 10px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .game-status {
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
+      font-weight: bold;
+      margin: 10px 0;
+      min-height: 25px;
+      line-height: 1.3;
+    }
+
+    .success {
+      color: #28a745;
+    }
+
+    .danger {
+      color: #dc3545;
+    }
+
+    .warning {
+      color: #ffc107;
+    }
+
+    .instructions {
+      font-size: clamp(0.6rem, 2vw, 0.75rem);
+      color: #555;
+      line-height: 1.2;
+      margin: 5px 0;
+      padding: 8px;
+    }
+
+    .mobile-hint {
+      font-size: clamp(0.7rem, 2vw, 0.85rem);
+      color: #666;
+      background: rgba(255, 255, 0, 0.1);
+      padding: 6px 8px;
+      border-radius: 6px;
+      margin: 5px 0;
+      border-left: 3px solid #FFD700;
+      line-height: 1.2;
+    }
+
+    .game-overlay-top {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .game-controls-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .game-score {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 12px;
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-size: clamp(1rem, 4vw, 1.2rem);
+      font-weight: bold;
+      color: #2C5530;
+      pointer-events: auto;
+    }
+
+    .game-new-dive {
+      background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      transition: transform 0.2s, box-shadow 0.2s;
+      user-select: none;
+      touch-action: manipulation;
+      pointer-events: auto;
+    }
+
+    .game-new-dive:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    .game-flip-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 6px 10px;
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .game-flip-controls .control-label {
+      font-size: clamp(0.6rem, 2vw, 0.7rem);
+      color: #666;
+      margin-bottom: 3px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .game-flip-controls .trick-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .game-flip-controls .trick-button {
+      background: linear-gradient(45deg, #4ECDC4, #44A08D);
+      border: none;
+      color: white;
+      padding: clamp(4px, 1vw, 8px) clamp(6px, 1.5vw, 10px);
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+      transition: transform 0.2s, box-shadow 0.2s;
+      user-select: none;
+      touch-action: manipulation;
+      min-height: 36px;
+      min-width: 36px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .game-flip-controls .trick-button:hover {
+      box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .game-flip-controls .trick-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 5px;
+      }
+
+      #gameCanvas {
+        width: 100vw;
+        max-width: 100vw;
+        height: auto;
+      }
+
+      .controls {
+        margin: 5px;
+        padding: 10px;
+      }
+    }
+
+    @media (orientation: landscape) and (max-height: 600px) {
+      .controls {
+        padding: 8px;
+        margin: 5px;
+      }
+
+      .instructions {
+        display: none;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+        margin: 2px 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🏊‍♀️ Springy Diving Game 🏊‍♀️</h1>
+
+  <div class="controls">
+    <div class="game-status" id="gameStatus">Tap and drag to aim your dive!</div>
+
+    <div class="mobile-hint">
+      📱 <strong>Mobile:</strong> Tap & drag to aim, use flip buttons while diving!<br>
+      ⌨️ <strong>Desktop:</strong> WASD to jump, Q/E for flips while diving!
+    </div>
+
+    <div class="instructions">
+      🎯 Hit ring = WIN, Miss ring = DROWN! • 🎪 Flips = 50pts each • ⌨️ WASD=Jump, Q/E=Flips
+    </div>
+  </div>
+
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <div class="game-overlay-top">
+      <div class="game-score">Score: <span id="score">0</span></div>
+      <div class="game-controls-right">
+        <button class="game-new-dive" onclick="resetGame()">🔄 New Dive</button>
+        <div class="game-flip-controls">
+          <div class="control-label">FLIPS</div>
+          <div class="trick-buttons">
+            <button class="trick-button" id="frontFlipBtn" onclick="performTrick('frontflip')"
+              onmousedown="performTrick('frontflip')" ontouchstart="performTrick('frontflip'); event.preventDefault()">
+              ↻ Front
+            </button>
+            <button class="trick-button" id="backFlipBtn" onclick="performTrick('backflip')"
+              onmousedown="performTrick('backflip')" ontouchstart="performTrick('backflip'); event.preventDefault()">
+              ↺ Back
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-resize canvas for mobile
+    function resizeCanvas() {
+      const container = document.getElementById('gameContainer');
+      const canvas = document.getElementById('gameCanvas');
+
+      const maxWidth = Math.min(window.innerWidth - 20, 800);
+      const aspectRatio = 600 / 800;
+      const maxHeight = maxWidth * aspectRatio;
+
+      canvas.style.width = maxWidth + 'px';
+      canvas.style.height = maxHeight + 'px';
+
+      // Update scale for touch calculations
+      canvasScale = maxWidth / 800;
+    }
+
+    let canvasScale = 1;
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(resizeCanvas, 100);
+    });
+    resizeCanvas();
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreElement = document.getElementById('score');
+    const statusElement = document.getElementById('gameStatus');
+
+    function updateScore(newScore) {
+      gameState.score = newScore;
+      if (scoreElement) scoreElement.textContent = gameState.score;
+    }
+
+    function showJumpResult(message, type = '') {
+      // Just show in status for now since we removed the overlay
+      updateStatus(message, type);
+    }
+
+    // Game state
+    let gameState = {
+      score: 0,
+      isAiming: false,
+      isDiving: false,
+      isDead: false,
+      isSuccess: false,
+      isDrowning: false,
+      isDancing: false
+    };
+
+    // Success animation state
+    let successAnimation = {
+      startTime: 0,
+      duration: 2000, // 2 seconds of dancing
+      dancePhase: 0
+    };
+
+    // Drowning animation state
+    let drowningAnimation = {
+      startTime: 0,
+      duration: 4500, // 4.5 seconds (was 3 seconds, now 1.5x slower)
+      bubbles: [],
+      splashParticles: []
+    };
+
+    // Stick figure
+    let stickFigure = {
+      x: 150,
+      y: 100,
+      vx: 0,
+      vy: 0,
+      rotation: 0,
+      rotationSpeed: 0,
+      onPlatform: true,
+      flips: 0,
+      tricks: []
+    };
+
+    // Diving board (springy)
+    let divingBoard = {
+      x: 100,
+      y: 120,
+      width: 100,
+      bounce: 0,
+      maxBounce: 10
+    };
+
+    // Lifering target
+    let lifering = {
+      x: 600,
+      y: 508, // 5 pixels higher (was 513, now 508)
+      outerRadius: 43, // 3px bigger (was 40, now 43)
+      innerRadius: 28  // 3px bigger (was 25, now 28)
+    };
+
+    function moveLifering() {
+      // Move lifering to a new random position in the water
+      // Keep it 5 pixels higher than before
+      lifering.x = 300 + Math.random() * 400; // Between x: 300-700
+      lifering.y = water.y + 28; // 5 pixels higher (was 33, now 28)
+    }
+
+    // Water
+    let water = {
+      y: 480,
+      waves: []
+    };
+
+    // Initialize water waves
+    for (let i = 0; i < 20; i++) {
+      water.waves.push({
+        x: i * 40,
+        offset: Math.random() * Math.PI * 2,
+        amplitude: 3 + Math.random() * 5
+      });
+    }
+
+    // Input handling
+    let mouse = { x: 0, y: 0, isDown: false };
+    let keys = {};
+
+    // Touch/Mouse event handling
+    function getEventPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+
+      return {
+        x: (clientX - rect.left) / canvasScale,
+        y: (clientY - rect.top) / canvasScale
+      };
+    }
+
+    // Mouse events
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('mouseup', handleEnd);
+
+    // Touch events
+    canvas.addEventListener('touchstart', handleStart);
+    canvas.addEventListener('touchmove', handleMove);
+    canvas.addEventListener('touchend', handleEnd);
+
+    function handleStart(e) {
+      e.preventDefault();
+      if (!gameState.isDiving && !gameState.isDead && !gameState.isSuccess) {
+        const pos = getEventPos(e);
+        mouse.x = pos.x;
+        mouse.y = pos.y;
+        mouse.isDown = true;
+        gameState.isAiming = true;
+      }
+    }
+
+    function handleMove(e) {
+      e.preventDefault();
+      const pos = getEventPos(e);
+      mouse.x = pos.x;
+      mouse.y = pos.y;
+    }
+
+    function handleEnd(e) {
+      e.preventDefault();
+      if (gameState.isAiming) {
+        launchStickFigure();
+        mouse.isDown = false;
+        gameState.isAiming = false;
+      }
+    }
+
+    // Keyboard controls (still available for desktop)
+    document.addEventListener('keydown', (e) => {
+      keys[e.key.toLowerCase()] = true;
+
+      // Jump controls (when on platform) - WASD only
+      if (stickFigure.onPlatform && !gameState.isDiving && !gameState.isDead && !gameState.isSuccess && !gameState.isDrowning) {
+        switch (e.key.toLowerCase()) {
+          case 'w':
+            e.preventDefault();
+            performJump(0, -150); // Straight up jump
+            break;
+          case 'a':
+            e.preventDefault();
+            performJump(-100, -120); // Left diagonal jump
+            break;
+          case 'd':
+            e.preventDefault();
+            performJump(100, -120); // Right diagonal jump
+            break;
+          case 's':
+            e.preventDefault();
+            performJump(0, -80); // Short hop
+            break;
+        }
+      }
+
+      // Trick controls (when diving) - Only flips now
+      if (gameState.isDiving && !stickFigure.onPlatform) {
+        switch (e.key.toLowerCase()) {
+          case 'q':
+            performTrick('frontflip');
+            break;
+          case 'e':
+            performTrick('backflip');
+            break;
+        }
+      }
+    });
+
+    function performJump(vx, vy) {
+      stickFigure.vx = vx * 0.006; // Increased from 0.003 (2x more sensitive)
+      stickFigure.vy = vy * 0.006; // Increased from 0.003 (2x more sensitive)
+      stickFigure.onPlatform = false;
+      gameState.isDiving = true;
+
+      // Add diving board bounce effect
+      divingBoard.bounce = divingBoard.maxBounce;
+
+      updateStatus("Diving! Use Q/E for flips!");
+    }
+
+    document.addEventListener('keyup', (e) => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    function updateTrickButtons() {
+      const canUseTricks = gameState.isDiving && !stickFigure.onPlatform && !gameState.isDead && !gameState.isSuccess && !gameState.isDrowning && !gameState.isDancing;
+
+      document.getElementById('frontFlipBtn').disabled = !canUseTricks;
+      document.getElementById('backFlipBtn').disabled = !canUseTricks;
+    }
+
+    function performTrick(trick) {
+      if (!gameState.isDiving || stickFigure.onPlatform || gameState.isDead || gameState.isSuccess || gameState.isDrowning || gameState.isDancing) {
+        return;
+      }
+
+      stickFigure.tricks.push(trick);
+
+      switch (trick) {
+        case 'frontflip':
+          stickFigure.rotationSpeed += 0.3;
+          stickFigure.flips++;
+          break;
+        case 'backflip':
+          stickFigure.rotationSpeed -= 0.3;
+          stickFigure.flips++;
+          break;
+      }
+
+      // Visual feedback for button press
+      const buttonId = {
+        'frontflip': 'frontFlipBtn',
+        'backflip': 'backFlipBtn'
+      }[trick];
+
+      if (buttonId) {
+        const button = document.getElementById(buttonId);
+        if (button) {
+          button.style.transform = 'scale(0.95)';
+          setTimeout(() => {
+            button.style.transform = '';
+          }, 100);
+        }
+      }
+    }
+
+    function launchStickFigure() {
+      const dx = mouse.x - stickFigure.x;
+      const dy = mouse.y - stickFigure.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const maxForce = 500; // Increased from 300 for more range
+      const force = Math.min(distance / 1.5, maxForce); // More sensitive (was 2.5, now 1.5)
+
+      stickFigure.vx = (dx / distance) * force * 0.04; // Increased from 0.02 (2x more sensitive)
+      stickFigure.vy = (dy / distance) * force * 0.04; // Increased from 0.02 (2x more sensitive)
+      stickFigure.onPlatform = false;
+      gameState.isDiving = true;
+
+      // Add diving board bounce effect
+      divingBoard.bounce = divingBoard.maxBounce;
+
+      updateStatus("Diving! Use Q/E for flips!");
+    }
+
+    function updatePhysics() {
+      if (!gameState.isDiving && !gameState.isDrowning && !gameState.isDancing) return;
+
+      if (gameState.isDrowning) {
+        updateDrowningAnimation();
+        return;
+      }
+
+      if (gameState.isDancing) {
+        updateSuccessAnimation();
+        return;
+      }
+
+      // Apply gravity - much slower for floaty feel
+      const gravity = 0.1; // Reduced from 0.3 to 0.1 (3x slower)
+      stickFigure.vy += gravity;
+
+      // Apply physics
+      stickFigure.x += stickFigure.vx;
+      stickFigure.y += stickFigure.vy;
+      stickFigure.rotation += stickFigure.rotationSpeed;
+
+      // Rotation dampening - slower for more floaty feel
+      stickFigure.rotationSpeed *= 0.995; // Reduced from 0.98 for slower dampening
+
+      // Diving board spring back
+      if (divingBoard.bounce > 0) {
+        divingBoard.bounce *= 0.9;
+        if (divingBoard.bounce < 0.1) divingBoard.bounce = 0;
+      }
+
+      // Check water collision
+      if (stickFigure.y > water.y - 10) {
+        // Only check for landing when hitting water, don't auto-drown
+        checkLanding();
+      }
+
+      // Check bounds
+      if (stickFigure.x < -50 || stickFigure.x > canvas.width + 50 || stickFigure.y > canvas.height + 50) {
+        gameOver("Missed the pool completely! 😅", true); // Reset score for missing pool
+      }
+    }
+
+    function checkLanding() {
+      const dx = Math.abs(stickFigure.x - lifering.x);
+
+      if (dx <= lifering.innerRadius) {
+        // Perfect landing in the hole!
+        landingSuccess();
+      } else {
+        // missed the hole - START DROWNING ANIMATION!
+        startDrowningAnimation();
+      }
+    }
+
+    function startDrowningAnimation() {
+      gameState.isDrowning = true;
+      gameState.isDiving = false;
+      drowningAnimation.startTime = Date.now();
+
+      // Reset score immediately when drowning starts
+      gameState.score = 0;
+      updateScore(0);
+
+      // Create initial splash particles
+      drowningAnimation.splashParticles = [];
+      for (let i = 0; i < 15; i++) {
+        drowningAnimation.splashParticles.push({
+          x: stickFigure.x + (Math.random() - 0.5) * 30,
+          y: water.y + (Math.random() - 0.5) * 10,
+          vx: (Math.random() - 0.5) * 8,
+          vy: Math.random() * -8 - 2,
+          life: 1.0,
+          size: Math.random() * 6 + 2
+        });
+      }
+
+      // Initialize bubbles array
+      drowningAnimation.bubbles = [];
+
+      updateStatus("Missed the ring - DROWNING! Score reset to 0! 💀", 'danger');
+
+      // Show jump result near score
+      showJumpResult("💀 Score Reset to 0!", 'danger');
+    }
+
+    function updateDrowningAnimation() {
+      const elapsed = Date.now() - drowningAnimation.startTime;
+      const progress = elapsed / drowningAnimation.duration;
+
+      if (progress >= 1.0) {
+        // Animation finished
+        gameState.isDrowning = false;
+        gameState.isDead = true;
+        updateStatus("Drowned! Try again!", 'danger');
+        return;
+      }
+
+      // Sink the stick figure gradually
+      const sinkSpeed = 0.33; // Slower sinking (was 0.5, now ~1.5x slower)
+      if (stickFigure.y < water.y + 60) {
+        stickFigure.y += sinkSpeed;
+      }
+
+      // Slow rotation while sinking
+      stickFigure.rotation += 0.013; // Slower rotation (was 0.02, now ~1.5x slower)
+
+      // Add new bubbles periodically
+      if (Math.random() < 0.2) { // Slower bubble generation (was 0.3, now 0.2)
+        drowningAnimation.bubbles.push({
+          x: stickFigure.x + (Math.random() - 0.5) * 20,
+          y: stickFigure.y + (Math.random() - 0.5) * 10,
+          vy: -Math.random() * 2 - 0.5,
+          life: 1.0,
+          size: Math.random() * 8 + 3
+        });
+      }
+
+      // Update existing bubbles
+      drowningAnimation.bubbles = drowningAnimation.bubbles.filter(bubble => {
+        bubble.y += bubble.vy;
+        bubble.life -= 0.007; // Slower fade (was 0.01, now ~1.5x slower)
+        return bubble.life > 0 && bubble.y > water.y - 50;
+      });
+
+      // Update splash particles
+      drowningAnimation.splashParticles = drowningAnimation.splashParticles.filter(particle => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vy += 0.3; // gravity
+        particle.life -= 0.013; // Slower fade (was 0.02, now ~1.5x slower)
+        return particle.life > 0 && particle.y < water.y + 20;
+      });
+    }
+
+    function updateSuccessAnimation() {
+      const elapsed = Date.now() - successAnimation.startTime;
+      const progress = elapsed / successAnimation.duration;
+
+      if (progress >= 1.0) {
+        // Animation finished
+        gameState.isDancing = false;
+        gameState.isDead = true; // Allow new dive after dancing
+        updateStatus("Great job! Ready for another dive!", 'success');
+        return;
+      }
+
+      // Update dance phase for rhythmic movement
+      successAnimation.dancePhase = (elapsed * 0.01) % (Math.PI * 2);
+
+      // Keep stick figure floating in place with dance movements
+      const bobHeight = Math.sin(successAnimation.dancePhase * 3) * 5; // Vertical bobbing
+      const originalY = lifering.y; // Stay near the ring
+      stickFigure.y = originalY + bobHeight;
+
+      // Gentle rotation for celebration
+      stickFigure.rotation += 0.05;
+    }
+
+    function landingSuccess(hitCenter = false) {
+      gameState.isSuccess = true;
+      gameState.isDiving = false;
+      gameState.isDancing = true;
+      successAnimation.startTime = Date.now();
+
+      // Calculate base score based on center hit
+      let points = hitCenter ? 200 : 100; // 200 for center, 100 for ring edge
+      points += stickFigure.flips * 50; // 50 points per flip
+
+      // Accuracy bonus only for center hits
+      if (hitCenter) {
+        const dx = stickFigure.x - lifering.x;
+        const dy = stickFigure.y - lifering.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const accuracyBonus = Math.max(0, Math.floor((lifering.innerRadius - distance) * 5));
+        points += accuracyBonus;
+      }
+
+      // Combo bonus for multiple flips
+      if (stickFigure.flips > 1) {
+        points += 25 * (stickFigure.flips - 1);
+      }
+
+      gameState.score += points;
+      updateScore(gameState.score);
+
+      let message = hitCenter ? `🎯 PERFECT CENTER! +${points} points!` : `🎉 HIT LIFERING! +${points} points!`;
+      if (stickFigure.flips > 0) message += ` (${stickFigure.flips} flips)`;
+
+      updateStatus(message, 'success');
+
+      // Show jump result near score
+      const resultText = hitCenter ? `🎯 +${points} pts!` : `🎉 +${points} pts!`;
+      showJumpResult(resultText, 'success');
+    }
+
+    function gameOver(message, resetScore = false) {
+      gameState.isDead = true;
+      gameState.isDiving = false;
+
+      if (resetScore) {
+        // Reset score only when completely missing the ring
+        gameState.score = 0;
+        updateScore(0);
+        // Don't move ring immediately - wait for new dive
+        updateStatus(message + " Score reset!", 'danger');
+
+        // Show jump result near score
+        showJumpResult("💦 Score Reset!", 'warning');
+      } else {
+        updateStatus(message, 'danger');
+      }
+    }
+
+    function updateStatus(message, type = '') {
+      if (statusElement) {
+        statusElement.textContent = message;
+        statusElement.className = `game-status ${type}`;
+      }
+    }
+
+    function resetGame() {
+      stickFigure = {
+        x: 150,
+        y: 100,
+        vx: 0,
+        vy: 0,
+        rotation: 0,
+        rotationSpeed: 0,
+        onPlatform: true,
+        flips: 0,
+        tricks: []
+      };
+
+      gameState.isDiving = false;
+      gameState.isDead = false;
+      gameState.isSuccess = false;
+      gameState.isAiming = false;
+      gameState.isDrowning = false;
+      gameState.isDancing = false;
+
+      drowningAnimation.bubbles = [];
+      drowningAnimation.splashParticles = [];
+
+      divingBoard.bounce = 0;
+
+      // Move ring to new position when starting a new dive
+      moveLifering();
+
+      updateStatus("Tap and drag to aim your dive!");
+    }
+
+    function drawStickFigure() {
+      ctx.save();
+      ctx.translate(stickFigure.x, stickFigure.y);
+      ctx.rotate(stickFigure.rotation);
+
+      // Adjust opacity if drowning
+      if (gameState.isDrowning) {
+        const elapsed = Date.now() - drowningAnimation.startTime;
+        const progress = elapsed / drowningAnimation.duration;
+        const opacity = Math.max(0.3, 1 - progress * 0.7);
+        ctx.globalAlpha = opacity;
+      }
+
+      // Body
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+
+      // Head
+      ctx.beginPath();
+      ctx.arc(0, -15, 8, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Body line
+      ctx.beginPath();
+      ctx.moveTo(0, -7);
+      ctx.lineTo(0, 15);
+      ctx.stroke();
+
+      // Arms - special animations for different states
+      if (gameState.isDrowning) {
+        // Flailing arms for drowning
+        const time = Date.now() * 0.01;
+        ctx.beginPath();
+        ctx.moveTo(-12 + Math.sin(time) * 3, -2 + Math.cos(time) * 2);
+        ctx.lineTo(0, 5);
+        ctx.lineTo(12 + Math.sin(time + Math.PI) * 3, -2 + Math.cos(time + Math.PI) * 2);
+        ctx.stroke();
+      } else if (gameState.isDancing) {
+        // Dancing arms - waving up and down
+        const danceTime = successAnimation.dancePhase;
+        const leftArmY = -2 + Math.sin(danceTime * 2) * 8;
+        const rightArmY = -2 + Math.sin(danceTime * 2 + Math.PI) * 8;
+        ctx.beginPath();
+        ctx.moveTo(-12, leftArmY);
+        ctx.lineTo(0, 5);
+        ctx.lineTo(12, rightArmY);
+        ctx.stroke();
+      } else {
+        // Normal arms
+        ctx.beginPath();
+        ctx.moveTo(-12, -2);
+        ctx.lineTo(0, 5);
+        ctx.lineTo(12, -2);
+        ctx.stroke();
+      }
+
+      // Legs - special animations for different states
+      if (gameState.isDrowning) {
+        // Kicking legs for drowning
+        const time = Date.now() * 0.015;
+        ctx.beginPath();
+        ctx.moveTo(-8 + Math.sin(time + 1) * 2, 25 + Math.cos(time) * 3);
+        ctx.lineTo(0, 15);
+        ctx.lineTo(8 + Math.sin(time + 1 + Math.PI) * 2, 25 + Math.cos(time + Math.PI) * 3);
+        ctx.stroke();
+      } else if (gameState.isDancing) {
+        // Dancing legs - stepping side to side
+        const danceTime = successAnimation.dancePhase;
+        const leftLegX = -8 + Math.sin(danceTime * 3) * 3;
+        const rightLegX = 8 + Math.sin(danceTime * 3 + Math.PI) * 3;
+        ctx.beginPath();
+        ctx.moveTo(leftLegX, 25);
+        ctx.lineTo(0, 15);
+        ctx.lineTo(rightLegX, 25);
+        ctx.stroke();
+      } else {
+        // Normal legs
+        ctx.beginPath();
+        ctx.moveTo(-8, 25);
+        ctx.lineTo(0, 15);
+        ctx.lineTo(8, 25);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawBubbles() {
+      if (!gameState.isDrowning) return;
+
+      ctx.save();
+
+      // Draw bubbles
+      drowningAnimation.bubbles.forEach(bubble => {
+        ctx.globalAlpha = bubble.life;
+        ctx.fillStyle = 'rgba(173, 216, 230, 0.8)';
+        ctx.beginPath();
+        ctx.arc(bubble.x, bubble.y, bubble.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bubble highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.beginPath();
+        ctx.arc(bubble.x - bubble.size * 0.3, bubble.y - bubble.size * 0.3, bubble.size * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Draw splash particles
+      drowningAnimation.splashParticles.forEach(particle => {
+        ctx.globalAlpha = particle.life;
+        ctx.fillStyle = '#4682B4';
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.restore();
+    }
+
+    function drawDivingBoard() {
+      // Platform
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(50, 110, 120, 15);
+
+      // Support pole
+      ctx.fillRect(55, 125, 8, 100);
+
+      // Spring effect
+      ctx.fillStyle = '#A0522D';
+      ctx.fillRect(divingBoard.x, divingBoard.y + divingBoard.bounce, divingBoard.width, 5);
+    }
+
+    function drawLifering() {
+      // Outer ring
+      ctx.fillStyle = '#FF4500';
+      ctx.beginPath();
+      ctx.arc(lifering.x, lifering.y, lifering.outerRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Inner hole (water showing through)
+      ctx.fillStyle = '#1E90FF';
+      ctx.beginPath();
+      ctx.arc(lifering.x, lifering.y, lifering.innerRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Ring highlights
+      ctx.strokeStyle = '#FFF';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(lifering.x, lifering.y, lifering.outerRadius - 5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function drawWater() {
+      // Water surface with waves
+      ctx.fillStyle = '#1E90FF';
+      ctx.fillRect(0, water.y, canvas.width, canvas.height - water.y);
+
+      // Animated waves
+      const time = Date.now() * 0.005;
+      ctx.strokeStyle = '#4682B4';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      for (let i = 0; i < water.waves.length; i++) {
+        const wave = water.waves[i];
+        const y = water.y + Math.sin(time + wave.offset) * wave.amplitude;
+
+        if (i === 0) {
+          ctx.moveTo(wave.x, y);
+        } else {
+          ctx.lineTo(wave.x, y);
+        }
+      }
+      ctx.stroke();
+    }
+
+    function drawAimingLine() {
+      if (!gameState.isAiming) return;
+
+      ctx.strokeStyle = '#FF0000';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([5, 5]);
+
+      ctx.beginPath();
+      ctx.moveTo(stickFigure.x, stickFigure.y);
+      ctx.lineTo(mouse.x, mouse.y);
+      ctx.stroke();
+
+      // Force indicator
+      const distance = Math.sqrt(
+        (mouse.x - stickFigure.x) ** 2 + (mouse.y - stickFigure.y) ** 2
+      );
+      const force = Math.min(distance / 1.5, 500);
+
+      ctx.setLineDash([]);
+      ctx.fillStyle = `rgba(255, 0, 0, ${Math.min(force / 500, 1)})`;
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawBackground() {
+      // Sky gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, water.y);
+      gradient.addColorStop(0, '#87CEEB');
+      gradient.addColorStop(1, '#B0E0E6');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, water.y);
+
+      // Clouds
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.beginPath();
+      ctx.arc(200, 80, 30, 0, Math.PI * 2);
+      ctx.arc(220, 70, 40, 0, Math.PI * 2);
+      ctx.arc(240, 80, 30, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(500, 60, 25, 0, Math.PI * 2);
+      ctx.arc(520, 55, 35, 0, Math.PI * 2);
+      ctx.arc(540, 65, 25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function gameLoop() {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw everything
+      drawBackground();
+      drawWater();
+      drawDivingBoard();
+      drawLifering();
+      drawStickFigure();
+      drawBubbles(); // Draw drowning effects
+      drawAimingLine();
+
+      // Update physics
+      updatePhysics();
+
+      // Update UI state
+      updateTrickButtons();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start the game
+    updateStatus("Tap and drag to aim your dive!");
+    gameLoop();
+  </script>
+</body>
+
+</html>
