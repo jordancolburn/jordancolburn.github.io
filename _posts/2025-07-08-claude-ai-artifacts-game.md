@@ -13,7 +13,11 @@ simple JavaScript games, but maybe AI was a fun way to dip my toe into those
 waters even further.
 
 After only four short prompts I already had a simple version of the diving board
-game running in the browser: [https://claude.ai/public/artifacts/57078a5a-83c7-47fe-9b1d-5c69491cbc7f](https://claude.ai/public/artifacts/57078a5a-83c7-47fe-9b1d-5c69491cbc7f).
+game running in the browser:
+
+<iframe src="https://claude.ai/public/artifacts/57078a5a-83c7-47fe-9b1d-5c69491cbc7f" width="100%" height="400" title="Early prototype"></iframe>
+
+<p class="text-center"><a href="https://claude.ai/public/artifacts/57078a5a-83c7-47fe-9b1d-5c69491cbc7f">View the early prototype</a></p>
 The prompts were:
 
 * "Help me make a JavaScript game. I want a springy stick figure diving board game the stick figure can jump in a direction and force of the users choosing (2d matrix of horizontal and vertical forces). The user has to land inside a small lifering in the water. The user can front flip, back flip and spin. The user gets points for flips combos, spins and accuracy close to the bouy. If the user just missed going through the hole, but hits it, the user drowns."
@@ -25,6 +29,10 @@ Recently I experimented with **Claude.ai** artifacts to build a small diving boa
 
 After dozens of prompts I finally downloaded the artifact and made the fixes manually. Five minutes of hands–on coding resolved the main issues. Being able to directly update the code was a huge help, especially after Claude seemed to cache old versions and insist it had used my latest changes.
 
-Here is the final playable artifact: [https://claude.ai/public/artifacts/444dae0c-7393-4e9a-a8e5-3ed762beb185](https://claude.ai/public/artifacts/444dae0c-7393-4e9a-a8e5-3ed762beb185)
+Here is the final playable artifact:
+
+<iframe src="https://claude.ai/public/artifacts/444dae0c-7393-4e9a-a8e5-3ed762beb185" width="100%" height="400" title="Final version"></iframe>
+
+<p class="text-center"><a href="https://claude.ai/public/artifacts/444dae0c-7393-4e9a-a8e5-3ed762beb185">Open the final artifact</a></p>
 
 Overall I was impressed with how quickly Claude generated a starting point, but it still takes real development time to polish the logic. If you hit a wall with the AI, don’t be afraid to dive into the code yourself—sometimes that’s all it takes to push past the valley.
