@@ -88,5 +88,9 @@ noFooter: true
       <span class="icon">&#x1F694;</span>
       Cops &amp; Robbers
     </a>
+    <a href="/kids/grant/word-search/" class="game-card">
+      <span class="icon">&#x1F50D;</span>
+      Word Search Detective
+    </a>
   </div>
 </div>
