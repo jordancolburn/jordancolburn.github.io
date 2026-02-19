@@ -66,6 +66,10 @@ noFooter: true
   .kid-card.reed {
     border-bottom: 6px solid #ff6b6b;
   }
+
+  .kid-card.brooke {
+    border-bottom: 6px solid #f0a500;
+  }
 </style>
 
 <div class="kids-hub">
@@ -78,6 +82,10 @@ noFooter: true
     <a href="/kids/reed/" class="kid-card reed">
       <span class="icon">&#x1F3AE;</span>
       Reed
+    </a>
+    <a href="/kids/brooke/" class="kid-card brooke">
+      <span class="icon">&#x2744;</span>
+      Brooke
     </a>
   </div>
 </div>
