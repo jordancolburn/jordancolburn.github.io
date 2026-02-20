@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Monster Slicer - Grant's Typing Game</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #1a0a2e, #2d1b4e);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* --- SCENE --- */
+    .scene {
+      width: 100%;
+      max-width: 700px;
+      height: 300px;
+      position: relative;
+      background: linear-gradient(to bottom, #0d0d2b 0%, #1a1a3e 40%, #2a4a2a 85%, #1a3a1a 100%);
+      border-bottom: 4px solid #4a2;
+      overflow: hidden;
+      margin-top: 10px;
+      border-radius: 12px 12px 0 0;
+    }
+
+    /* stars */
+    .stars {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 40%;
+    }
+    .star {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle 2s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.3; }
+      to { opacity: 1; }
+    }
+
+    /* ground */
+    .ground-detail {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      height: 50px;
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      padding: 0 10px;
+      overflow: hidden;
+    }
+    .grass {
+      font-size: 18px;
+      opacity: 0.6;
+    }
+
+    /* hero */
+    .hero {
+      position: absolute;
+      bottom: 40px;
+      left: 15%;
+      font-size: 64px;
+      transition: transform 0.2s;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+      z-index: 10;
+    }
+    .hero.slash {
+      animation: slashAnim 0.5s ease-out;
+    }
+    @keyframes slashAnim {
+      0% { transform: translateX(0) rotate(0deg); }
+      30% { transform: translateX(60px) rotate(20deg); }
+      50% { transform: translateX(80px) rotate(-15deg); }
+      100% { transform: translateX(0) rotate(0deg); }
+    }
+
+    /* sword */
+    .sword {
+      position: absolute;
+      bottom: 75px;
+      left: calc(15% + 55px);
+      font-size: 40px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 11;
+      transform: rotate(-45deg);
+    }
+    .sword.visible {
+      opacity: 1;
+      animation: swordSwing 0.5s ease-out;
+    }
+    @keyframes swordSwing {
+      0% { transform: rotate(-45deg) translateX(0); }
+      30% { transform: rotate(20deg) translateX(50px); }
+      60% { transform: rotate(-10deg) translateX(70px); }
+      100% { transform: rotate(-45deg) translateX(0); opacity: 0; }
+    }
+
+    /* slash effect */
+    .slash-effect {
+      position: absolute;
+      bottom: 60px;
+      right: 22%;
+      font-size: 50px;
+      opacity: 0;
+      z-index: 12;
+      pointer-events: none;
+    }
+    .slash-effect.show {
+      animation: slashFx 0.6s ease-out forwards;
+    }
+    @keyframes slashFx {
+      0% { opacity: 0; transform: scale(0.5) rotate(-20deg); }
+      30% { opacity: 1; transform: scale(1.3) rotate(10deg); }
+      100% { opacity: 0; transform: scale(2) rotate(0deg); }
+    }
+
+    /* monster */
+    .monster-area {
+      position: absolute;
+      bottom: 40px;
+      right: 15%;
+      text-align: center;
+      z-index: 5;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .monster-area .monster {
+      font-size: 64px;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+      transition: transform 0.3s;
+    }
+    .monster-area.hit .monster {
+      animation: monsterHit 0.6s ease-out;
+    }
+    @keyframes monsterHit {
+      0% { transform: scale(1); }
+      20% { transform: scale(1.3) rotate(10deg); }
+      50% { transform: scale(0.5) rotate(-20deg); opacity: 0.5; }
+      80% { transform: scale(0.3) translateY(20px); opacity: 0.2; }
+      100% { transform: scale(0) translateY(40px); opacity: 0; }
+    }
+    .monster-area.enter .monster {
+      animation: monsterEnter 0.5s ease-out;
+    }
+    @keyframes monsterEnter {
+      0% { transform: scale(0) translateY(-30px); opacity: 0; }
+      60% { transform: scale(1.2) translateY(5px); }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .monster-hp {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 10px;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .monster-hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f44, #ff6b6b);
+      border-radius: 5px;
+      transition: width 0.3s;
+      width: 100%;
+    }
+
+    /* good job popup */
+    .good-job {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 42px;
+      font-weight: 900;
+      color: #FFD700;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 2px 2px 0 #c90;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      white-space: nowrap;
+    }
+    .good-job.show {
+      animation: goodJobAnim 1.2s ease-out forwards;
+    }
+    @keyframes goodJobAnim {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      40% { transform: translate(-50%, -50%) scale(1); }
+      80% { opacity: 1; transform: translate(-50%, -60%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
+    }
+
+    /* sparkle particles */
+    .sparkle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 13;
+    }
+
+    /* --- GAME AREA --- */
+    .game-area {
+      width: 100%;
+      max-width: 700px;
+      background: #1a0a2e;
+      padding: 20px 20px 16px;
+      border-radius: 0 0 12px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat {
+      font-size: 15px;
+      color: #b8a0d0;
+      font-weight: 600;
+    }
+    .stat b { color: #fff; font-size: 18px; }
+
+    .word-display {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: 6px;
+      margin-bottom: 14px;
+      min-height: 60px;
+      display: flex;
+      gap: 3px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .word-display .letter {
+      color: #443355;
+      transition: color 0.1s, transform 0.1s;
+    }
+    .word-display .letter.typed {
+      color: #7ED957;
+      transform: scale(1.1);
+    }
+    .word-display .letter.current {
+      color: #FFD700;
+      text-decoration: underline;
+      animation: pulse 0.8s ease-in-out infinite alternate;
+    }
+    .word-display .letter.error { color: #FF6B6B; }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.15); }
+    }
+
+    .input-area {
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+    }
+    .type-input {
+      width: 100%;
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      padding: 12px 16px;
+      border: 3px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      outline: none;
+      letter-spacing: 3px;
+      caret-color: #FFD700;
+      transition: border-color 0.2s;
+    }
+    .type-input:focus { border-color: #a855f7; }
+    .type-input.error-flash { border-color: #FF6B6B; }
+
+    .message {
+      margin-top: 14px;
+      font-size: 18px;
+      font-weight: 700;
+      min-height: 28px;
+      text-align: center;
+    }
+    .message.good { color: #7ED957; }
+    .message.great { color: #FFD700; }
+
+    /* --- SCREENS --- */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(10, 5, 20, 0.94);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .overlay.hidden { display: none; }
+    .overlay h1 {
+      font-size: 44px;
+      color: #FFD700;
+      text-shadow: 0 4px 20px rgba(255,215,0,0.3);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .overlay .subtitle {
+      font-size: 20px;
+      color: #b8a0d0;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .overlay .big-emoji {
+      font-size: 80px;
+      margin-bottom: 16px;
+    }
+    .overlay .win-text {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .overlay .win-stats {
+      font-size: 16px;
+      color: #b8a0d0;
+      margin-bottom: 24px;
+      text-align: center;
+      line-height: 1.8;
+    }
+    .play-btn {
+      padding: 16px 48px;
+      font-size: 24px;
+      font-weight: 800;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(168, 85, 247, 0.4);
+      transition: transform 0.15s;
+    }
+    .play-btn:hover { transform: scale(1.06); }
+    .play-btn:active { transform: scale(0.97); }
+
+    .difficulty-picks {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .diff-btn {
+      padding: 14px 28px;
+      font-size: 22px;
+      font-weight: 800;
+      border: none;
+      border-radius: 16px;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.15s;
+      text-align: center;
+      min-width: 130px;
+    }
+    .diff-btn:hover { transform: scale(1.06); }
+    .diff-btn:active { transform: scale(0.97); }
+    .diff-btn .diff-label { display: block; font-size: 13px; font-weight: 600; opacity: 0.85; margin-top: 2px; }
+    .diff-btn.easy { background: linear-gradient(135deg, #7ED957, #56C1FF); box-shadow: 0 6px 20px rgba(126,217,87,0.3); }
+    .diff-btn.medium { background: linear-gradient(135deg, #a855f7, #ec4899); box-shadow: 0 6px 20px rgba(168,85,247,0.3); }
+    .diff-btn.hard { background: linear-gradient(135deg, #f44, #ff6b6b); box-shadow: 0 6px 20px rgba(255,68,68,0.3); }
+  </style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div class="overlay" id="startScreen">
+  <div class="big-emoji">&#x2694;&#xFE0F;</div>
+  <h1>Monster Slicer!</h1>
+  <div class="subtitle">Type the word to swing your sword<br>and defeat the monsters!</div>
+  <div class="difficulty-picks">
+    <button class="diff-btn easy" onclick="ensureAudio(); startGame('easy')">Easy<span class="diff-label">Short words</span></button>
+    <button class="diff-btn medium" onclick="ensureAudio(); startGame('medium')">Medium<span class="diff-label">Mixed words</span></button>
+    <button class="diff-btn hard" onclick="ensureAudio(); startGame('hard')">Hard<span class="diff-label">Big words</span></button>
+  </div>
+</div>
+
+<!-- WIN SCREEN -->
+<div class="overlay hidden" id="winScreen">
+  <div class="big-emoji">&#x1F3C6;</div>
+  <div class="win-text" style="color:#FFD700;">You defeated all the monsters!</div>
+  <div class="win-stats" id="winStats"></div>
+  <div class="difficulty-picks">
+    <button class="diff-btn easy" onclick="ensureAudio(); startGame('easy')">Easy<span class="diff-label">Short words</span></button>
+    <button class="diff-btn medium" onclick="ensureAudio(); startGame('medium')">Medium<span class="diff-label">Mixed words</span></button>
+    <button class="diff-btn hard" onclick="ensureAudio(); startGame('hard')">Hard<span class="diff-label">Big words</span></button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="scene" id="scene">
+  <div class="stars" id="stars"></div>
+  <div class="ground-detail" id="ground"></div>
+
+  <div class="hero" id="hero">&#x1F9D1;&#x200D;&#x2694;&#xFE0F;</div>
+  <div class="sword" id="sword">&#x2694;&#xFE0F;</div>
+  <div class="slash-effect" id="slashEffect">&#x1F4A5;</div>
+
+  <div class="monster-area" id="monsterArea">
+    <div class="monster-hp"><div class="monster-hp-fill" id="monsterHp"></div></div>
+    <div class="monster" id="monster">&#x1F47E;</div>
+  </div>
+
+  <div class="good-job" id="goodJob">Good Job!</div>
+</div>
+
+<div class="game-area">
+  <div class="stats">
+    <div class="stat">Monsters: <b id="monsterCount">0</b></div>
+    <div class="stat">Score: <b id="score">0</b></div>
+    <div class="stat">Streak: <b id="streakCount">0</b></div>
+  </div>
+
+  <div class="word-display" id="wordDisplay"></div>
+
+  <div class="input-area">
+    <input type="text" class="type-input" id="typeInput" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="type here...">
+  </div>
+
+  <div class="message" id="message">&nbsp;</div>
+</div>
+
+<script>
+// Words for a 7-year-old, grouped by difficulty
+const easyWords = [
+  "cat", "dog", "run", "sun", "big", "red", "hat", "cup", "map", "pig",
+  "bat", "sit", "hop", "fun", "net", "bed", "box", "fox", "top", "hot",
+  "jam", "van", "bus", "pen", "ten", "leg", "egg", "mud", "hug", "bug",
+  "rug", "mop", "pot", "log", "zip", "win", "fin", "lip", "tip", "dip"
+];
+const medWords = [
+  "jump", "hero", "gold", "star", "king", "fire", "bone", "cave", "dark",
+  "fast", "glow", "lamp", "ring", "slam", "bolt", "moon", "tree", "fish",
+  "bird", "frog", "ship", "rock", "sand", "wave", "snow", "rain", "book",
+  "cake", "home", "play", "swim", "fly", "hand", "foot", "door", "wall"
+];
+const hardWords = [
+  "sword", "brave", "magic", "flame", "quest", "giant", "beast", "power",
+  "guard", "stone", "armor", "blast", "storm", "night", "light", "fight",
+  "super", "ninja", "robot", "space", "laser", "tiger", "eagle", "shark",
+  "dragon", "shield", "knight", "castle", "battle", "forest", "wizard",
+  "goblin", "dungeon", "monster"
+];
+
+// Monsters rotate through these
+const monsters = [
+  { emoji: '\u{1F47E}', name: 'Alien' },
+  { emoji: '\u{1F409}', name: 'Dragon' },
+  { emoji: '\u{1F47F}', name: 'Imp' },
+  { emoji: '\u{1F479}', name: 'Ogre' },
+  { emoji: '\u{1F47A}', name: 'Goblin' },
+  { emoji: '\u{1F577}\uFE0F', name: 'Spider' },
+  { emoji: '\u{1F987}', name: 'Bat' },
+  { emoji: '\u{1F40D}', name: 'Snake' },
+  { emoji: '\u{1F480}', name: 'Skeleton' },
+  { emoji: '\u{1F9DF}', name: 'Zombie' }
+];
+
+const MODES = {
+  easy:   { monsters: 6,  wordsPerMonster: 1, wordMix: [0.85, 1.0, 1.0] },
+  medium: { monsters: 10, wordsPerMonster: 2, wordMix: [0.3, 0.75, 1.0] },
+  hard:   { monsters: 14, wordsPerMonster: 3, wordMix: [0.1, 0.4, 1.0] }
+};
+
+let currentMode;
+let monstersDefeated, totalScore, streak, bestStreak, startTime;
+let currentWord, currentMonster, monsterWordsLeft, monsterMaxWords;
+let gameActive, audioCtx;
+
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playNote(freq, type, start, dur, vol) {
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(vol || 0.2, start);
+  g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(start); o.stop(start + dur);
+}
+
+function playType() {
+  ensureAudio();
+  playNote(600, 'sine', audioCtx.currentTime, 0.05, 0.08);
+}
+
+function playSwordSlice() {
+  ensureAudio();
+  const t = audioCtx.currentTime;
+  // whoosh
+  playNote(300, 'sawtooth', t, 0.1, 0.1);
+  playNote(600, 'sawtooth', t + 0.05, 0.1, 0.08);
+  // impact
+  playNote(150, 'square', t + 0.12, 0.15, 0.12);
+}
+
+function playMonsterDefeat() {
+  ensureAudio();
+  const t = audioCtx.currentTime;
+  playNote(523, 'triangle', t, 0.15, 0.18);
+  playNote(659, 'triangle', t + 0.1, 0.15, 0.18);
+  playNote(784, 'triangle', t + 0.2, 0.15, 0.18);
+  playNote(1047, 'triangle', t + 0.3, 0.3, 0.22);
+}
+
+function playVictory() {
+  ensureAudio();
+  const t = audioCtx.currentTime;
+  const melody = [523, 659, 784, 1047, 784, 1047, 1319];
+  melody.forEach((freq, i) => {
+    playNote(freq, 'triangle', t + i * 0.15, 0.2, 0.2);
+  });
+}
+
+function playError() {
+  ensureAudio();
+  playNote(200, 'square', audioCtx.currentTime, 0.15, 0.08);
+}
+
+function generateStars() {
+  const container = document.getElementById('stars');
+  container.innerHTML = '';
+  for (let i = 0; i < 40; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.animationDelay = (Math.random() * 2) + 's';
+    star.style.width = star.style.height = (2 + Math.random() * 3) + 'px';
+    container.appendChild(star);
+  }
+}
+
+function generateGround() {
+  const container = document.getElementById('ground');
+  container.innerHTML = '';
+  const items = ['\u{1F33F}', '\u{1F33E}', '\u{1F343}', '\u{1FAA8}', '\u{1F33F}'];
+  for (let i = 0; i < 20; i++) {
+    const el = document.createElement('span');
+    el.className = 'grass';
+    el.textContent = items[Math.floor(Math.random() * items.length)];
+    el.style.opacity = 0.3 + Math.random() * 0.4;
+    container.appendChild(el);
+  }
+}
+
+function spawnSparkles(x, y) {
+  const colors = ['#FFD700', '#FF6B6B', '#7ED957', '#56C1FF', '#a855f7', '#ec4899'];
+  for (let i = 0; i < 8; i++) {
+    const spark = document.createElement('div');
+    spark.className = 'sparkle';
+    spark.style.left = x + 'px';
+    spark.style.top = y + 'px';
+    spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+    const angle = (Math.PI * 2 / 8) * i;
+    const dist = 40 + Math.random() * 60;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    document.getElementById('scene').appendChild(spark);
+    spark.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx}px, ${dy}px) scale(0)`, opacity: 0 }
+    ], { duration: 600, easing: 'ease-out' });
+    setTimeout(() => spark.remove(), 600);
+  }
+}
+
+function pickWord() {
+  const mix = currentMode.wordMix;
+  const roll = Math.random();
+  let pool;
+  if (roll < mix[0]) {
+    pool = easyWords;
+  } else if (roll < mix[1]) {
+    pool = medWords;
+  } else {
+    pool = hardWords;
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function renderWord(typed) {
+  const display = document.getElementById('wordDisplay');
+  display.innerHTML = '';
+  for (let i = 0; i < currentWord.length; i++) {
+    const span = document.createElement('span');
+    span.className = 'letter';
+    span.textContent = currentWord[i];
+    if (i < typed.length) {
+      span.classList.add(typed[i] === currentWord[i] ? 'typed' : 'error');
+    } else if (i === typed.length) {
+      span.classList.add('current');
+    }
+    display.appendChild(span);
+  }
+}
+
+function updateStats() {
+  document.getElementById('monsterCount').textContent = monstersDefeated;
+  document.getElementById('score').textContent = totalScore;
+  document.getElementById('streakCount').textContent = streak;
+}
+
+function showMessage(text, cls) {
+  const el = document.getElementById('message');
+  el.textContent = text;
+  el.className = 'message ' + cls;
+  setTimeout(() => { el.innerHTML = '&nbsp;'; el.className = 'message'; }, 1200);
+}
+
+function showGoodJob() {
+  const gj = document.getElementById('goodJob');
+  gj.classList.remove('show');
+  // force reflow
+  void gj.offsetWidth;
+  gj.classList.add('show');
+  setTimeout(() => gj.classList.remove('show'), 1300);
+}
+
+function updateMonsterHp() {
+  const pct = (monsterWordsLeft / monsterMaxWords) * 100;
+  document.getElementById('monsterHp').style.width = pct + '%';
+}
+
+function spawnMonster() {
+  const m = monsters[Math.floor(Math.random() * monsters.length)];
+  currentMonster = m;
+
+  // More words needed for later monsters
+  monsterMaxWords = currentMode.wordsPerMonster + Math.floor(monstersDefeated / 3);
+  monsterWordsLeft = monsterMaxWords;
+
+  document.getElementById('monster').textContent = m.emoji;
+  updateMonsterHp();
+
+  const area = document.getElementById('monsterArea');
+  area.classList.remove('hit');
+  area.style.opacity = '1';
+  area.classList.add('enter');
+  setTimeout(() => area.classList.remove('enter'), 500);
+}
+
+function sliceMonster() {
+  // Sword swing animation
+  const hero = document.getElementById('hero');
+  hero.classList.remove('slash');
+  void hero.offsetWidth;
+  hero.classList.add('slash');
+  setTimeout(() => hero.classList.remove('slash'), 500);
+
+  // Sword visual
+  const sword = document.getElementById('sword');
+  sword.classList.remove('visible');
+  void sword.offsetWidth;
+  sword.classList.add('visible');
+  setTimeout(() => sword.classList.remove('visible'), 500);
+
+  // Slash effect
+  const slash = document.getElementById('slashEffect');
+  slash.classList.remove('show');
+  void slash.offsetWidth;
+  slash.classList.add('show');
+  setTimeout(() => slash.classList.remove('show'), 600);
+
+  playSwordSlice();
+
+  // Sparkles near monster
+  const monsterEl = document.getElementById('monsterArea');
+  const rect = monsterEl.getBoundingClientRect();
+  const sceneRect = document.getElementById('scene').getBoundingClientRect();
+  spawnSparkles(rect.left - sceneRect.left + 30, rect.top - sceneRect.top + 30);
+
+  monsterWordsLeft--;
+  updateMonsterHp();
+
+  if (monsterWordsLeft <= 0) {
+    defeatMonster();
+  }
+}
+
+function defeatMonster() {
+  monstersDefeated++;
+  totalScore += 100 * monstersDefeated;
+  updateStats();
+
+  // Monster death animation
+  const area = document.getElementById('monsterArea');
+  area.classList.add('hit');
+
+  playMonsterDefeat();
+  showGoodJob();
+
+  if (monstersDefeated >= currentMode.monsters) {
+    setTimeout(() => winGame(), 1200);
+    return;
+  }
+
+  // Spawn next monster after delay
+  setTimeout(() => {
+    spawnMonster();
+  }, 1000);
+}
+
+function nextWord() {
+  currentWord = pickWord();
+  const input = document.getElementById('typeInput');
+  input.value = '';
+  renderWord('');
+}
+
+function wordCompleted() {
+  streak++;
+  if (streak > bestStreak) bestStreak = streak;
+  totalScore += currentWord.length * 10 + (streak * 5);
+  updateStats();
+
+  sliceMonster();
+
+  if (monsterWordsLeft > 0) {
+    if (streak > 0 && streak % 5 === 0) {
+      showMessage('STREAK x' + streak + '! Amazing!', 'great');
+    } else {
+      const msgs = ['Nice slice!', 'Great hit!', 'Pow!', 'Sliced it!'];
+      showMessage(msgs[Math.floor(Math.random() * msgs.length)], 'good');
+    }
+  }
+
+  setTimeout(() => nextWord(), 400);
+}
+
+function winGame() {
+  gameActive = false;
+
+  playVictory();
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  const statsEl = document.getElementById('winStats');
+  statsEl.innerHTML =
+    'Monsters defeated: <b style="color:#fff">' + monstersDefeated + '</b><br>' +
+    'Total score: <b style="color:#FFD700">' + totalScore + '</b><br>' +
+    'Best streak: <b style="color:#a855f7">' + bestStreak + '</b><br>' +
+    'Time: <b style="color:#fff">' + elapsed + 's</b>';
+
+  document.getElementById('winScreen').classList.remove('hidden');
+}
+
+function startGame(diff) {
+  currentMode = MODES[diff] || MODES.medium;
+  monstersDefeated = 0;
+  totalScore = 0;
+  streak = 0;
+  bestStreak = 0;
+  startTime = Date.now();
+  gameActive = true;
+
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('winScreen').classList.add('hidden');
+
+  generateStars();
+  generateGround();
+  updateStats();
+  spawnMonster();
+  nextWord();
+
+  document.getElementById('typeInput').focus();
+}
+
+// Input handling
+const input = document.getElementById('typeInput');
+input.addEventListener('input', () => {
+  if (!gameActive) return;
+  const val = input.value.toLowerCase();
+  renderWord(val);
+
+  if (val.length > 0) playType();
+
+  // Check for errors
+  let hasError = false;
+  for (let i = 0; i < val.length; i++) {
+    if (i >= currentWord.length || val[i] !== currentWord[i]) {
+      hasError = true;
+      break;
+    }
+  }
+
+  if (hasError) {
+    input.classList.add('error-flash');
+    setTimeout(() => input.classList.remove('error-flash'), 200);
+  }
+
+  // Word completed correctly
+  if (val === currentWord) {
+    wordCompleted();
+  }
+});
+
+// Skip word on Escape (resets streak)
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && gameActive) {
+    streak = 0;
+    updateStats();
+    playError();
+    showMessage('Skipped!', 'miss');
+    nextWord();
+  }
+});
+
+// Keep focus
+input.addEventListener('blur', () => {
+  if (gameActive) setTimeout(() => input.focus(), 100);
+});
+
+</script>
+</body>
+</html>

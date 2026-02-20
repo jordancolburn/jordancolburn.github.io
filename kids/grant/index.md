@@ -92,5 +92,13 @@ noFooter: true
       <span class="icon">&#x1F50D;</span>
       Word Search Detective
     </a>
+    <a href="/kids/grant/math-game/" class="game-card">
+      <span class="icon">&#x1F4AF;</span>
+      Math Game
+    </a>
+    <a href="/kids/grant/sword-game/" class="game-card">
+      <span class="icon">&#x2694;&#xFE0F;</span>
+      Monster Slicer
+    </a>
   </div>
 </div>

@@ -88,5 +88,13 @@ noFooter: true
       <span class="icon">&#x1F524;</span>
       Letter Match
     </a>
+    <a href="/kids/reed/racing-game/" class="game-card">
+      <span class="icon">&#x1F3CE;</span>
+      Racing Game
+    </a>
+    <a href="/kids/reed/counting-game/" class="game-card">
+      <span class="icon">&#x1F522;</span>
+      Counting Game
+    </a>
   </div>
 </div>

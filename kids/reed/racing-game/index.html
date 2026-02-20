@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Reed's Racing Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 100vw;
+      min-height: 100vh;
+      background: #1a1a2e;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 10px;
+      left: 15px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.1rem;
+      z-index: 100;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 1; }
+
+    /* START SCREEN */
+    .start-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      text-align: center;
+      padding: 2rem;
+    }
+    .start-screen h1 {
+      font-size: 3rem;
+      color: #fff;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+      margin-bottom: 0.5rem;
+    }
+    .start-screen .subtitle {
+      color: rgba(255,255,255,0.9);
+      font-size: 1.3rem;
+      margin-bottom: 2rem;
+      max-width: 500px;
+      line-height: 1.6;
+    }
+    .start-btn {
+      font-size: 2rem;
+      padding: 1rem 3rem;
+      border: none;
+      border-radius: 50px;
+      background: #ff6b6b;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 8px 25px rgba(255,107,107,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: pulse 2s infinite;
+    }
+    .start-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 35px rgba(255,107,107,0.5);
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* GAME SCREEN */
+    .game-screen {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Scene container - centers the road */
+    .scene {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 400px;
+      max-width: 90vw;
+      height: 100%;
+    }
+
+    /* Grass fills the whole background */
+    .grass {
+      position: absolute;
+      top: 0;
+      left: -100vw;
+      right: -100vw;
+      height: 100%;
+      background: #4a7c3f;
+    }
+
+    /* Road */
+    .road {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #444;
+      border-left: 8px solid #fff;
+      border-right: 8px solid #fff;
+    }
+    .road-line {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 60px;
+      background: #ffeb3b;
+      border-radius: 3px;
+      transition: none;
+    }
+
+    /* Driving animation - road lines scroll down */
+    .driving .road-line {
+      animation: roadScroll 0.8s linear infinite;
+    }
+    @keyframes roadScroll {
+      from { transform: translateX(-50%) translateY(0); }
+      to { transform: translateX(-50%) translateY(100px); }
+    }
+
+    /* Car */
+    .car {
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 110px;
+      z-index: 10;
+    }
+    .car-body {
+      width: 70px;
+      height: 110px;
+      position: relative;
+    }
+    .car-top {
+      position: absolute;
+      top: 0;
+      left: 10px;
+      width: 50px;
+      height: 40px;
+      background: #2196F3;
+      border-radius: 15px 15px 0 0;
+    }
+    .car-window {
+      position: absolute;
+      top: 8px;
+      left: 17px;
+      width: 36px;
+      height: 20px;
+      background: #81D4FA;
+      border-radius: 8px 8px 0 0;
+    }
+    .car-main {
+      position: absolute;
+      top: 35px;
+      left: 2px;
+      width: 66px;
+      height: 70px;
+      background: #1565C0;
+      border-radius: 5px 5px 10px 10px;
+    }
+    .car-stripe {
+      position: absolute;
+      top: 55px;
+      left: 2px;
+      width: 66px;
+      height: 6px;
+      background: #fff;
+    }
+    .wheel {
+      position: absolute;
+      width: 16px;
+      height: 24px;
+      background: #333;
+      border-radius: 4px;
+    }
+    .wheel-fl { top: 38px; left: -6px; }
+    .wheel-fr { top: 38px; right: -6px; }
+    .wheel-bl { top: 80px; left: -6px; }
+    .wheel-br { top: 80px; right: -6px; }
+
+    /* Obstacle */
+    .obstacle {
+      position: absolute;
+      bottom: 200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      z-index: 5;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      animation: obstacleBounce 1.5s ease-in-out infinite;
+    }
+    @keyframes obstacleBounce {
+      0%, 100% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.08); }
+    }
+
+    /* Score */
+    .score-display {
+      position: fixed;
+      top: 10px;
+      right: 15px;
+      z-index: 100;
+      text-align: right;
+    }
+    .score-display .label {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+    }
+    .score-display .score-value {
+      color: #ffeb3b;
+      font-size: 2.5rem;
+      font-weight: 900;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* Lives */
+    .lives-display {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      font-size: 2rem;
+    }
+
+    /* Letter prompt - hidden, not needed */
+
+    /* Feedback overlay */
+    .feedback {
+      position: fixed;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 200;
+      font-size: 4rem;
+      font-weight: 900;
+      text-shadow: 3px 3px 8px rgba(0,0,0,0.4);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .feedback.show {
+      animation: feedbackPop 0.8s ease forwards;
+    }
+    @keyframes feedbackPop {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      25% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+      75% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+    }
+
+    .feedback.correct { color: #4CAF50; }
+    .feedback.wrong { color: #f44336; }
+
+    /* Crash shake */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-10px); }
+      80% { transform: translateX(5px); }
+    }
+    .shake { animation: shake 0.4s ease; }
+
+    /* Game Over */
+    .game-over-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      text-align: center;
+      padding: 2rem;
+    }
+    .game-over-screen h1 {
+      font-size: 3rem;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+    .game-over-screen .final-score {
+      font-size: 5rem;
+      color: #ffeb3b;
+      font-weight: 900;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+      margin-bottom: 0.5rem;
+    }
+    .game-over-screen .final-label {
+      color: rgba(255,255,255,0.9);
+      font-size: 1.3rem;
+      margin-bottom: 2rem;
+    }
+    .game-over-screen .message {
+      color: #fff;
+      font-size: 1.8rem;
+      margin-bottom: 2rem;
+      max-width: 400px;
+      line-height: 1.4;
+    }
+    .play-again-btn {
+      font-size: 2rem;
+      padding: 1rem 3rem;
+      border: none;
+      border-radius: 50px;
+      background: #4CAF50;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 8px 25px rgba(76,175,80,0.4);
+      transition: transform 0.2s;
+      animation: pulse 2s infinite;
+    }
+    .play-again-btn:hover { transform: scale(1.05); }
+
+    /* Stars */
+    .star {
+      position: fixed;
+      font-size: 2rem;
+      pointer-events: none;
+      z-index: 150;
+      animation: starFloat 1s ease forwards;
+    }
+    @keyframes starFloat {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
+    }
+
+    /* Dodge animation */
+    .dodge-left { animation: dodgeL 0.5s ease; }
+    .dodge-right { animation: dodgeR 0.5s ease; }
+    @keyframes dodgeL {
+      0% { transform: translateX(-50%); }
+      40% { transform: translateX(calc(-50% - 60px)); }
+      100% { transform: translateX(-50%); }
+    }
+    @keyframes dodgeR {
+      0% { transform: translateX(-50%); }
+      40% { transform: translateX(calc(-50% + 60px)); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Car wobble while driving */
+    .car-driving {
+      animation: carWobble 0.3s ease-in-out infinite alternate;
+    }
+    @keyframes carWobble {
+      0% { transform: translateX(-50%) rotate(-1deg); }
+      100% { transform: translateX(-50%) rotate(1deg); }
+    }
+
+    /* Obstacle appear */
+    .obstacle-enter {
+      animation: obstacleAppear 0.5s ease forwards;
+    }
+    @keyframes obstacleAppear {
+      0% { transform: translateX(-50%) scale(0); opacity: 0; }
+      60% { transform: translateX(-50%) scale(1.15); opacity: 1; }
+      100% { transform: translateX(-50%) scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/kids/reed/" class="back-link">&larr; Back</a>
+
+  <!-- START SCREEN -->
+  <div class="start-screen" id="startScreen">
+    <h1>Reed's Racing Game!</h1>
+    <p class="subtitle">
+      Look at the letter on the road and find it on the keyboard!
+      Press the right letter to dodge!
+    </p>
+    <button class="start-btn" onclick="startGame()">GO!</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="game-screen" id="gameScreen">
+    <div class="scene" id="scene">
+      <div class="grass"></div>
+      <div class="road" id="road"></div>
+
+      <div class="car" id="car">
+        <div class="car-body">
+          <div class="car-top"></div>
+          <div class="car-window"></div>
+          <div class="car-main"></div>
+          <div class="car-stripe"></div>
+          <div class="wheel wheel-fl"></div>
+          <div class="wheel wheel-fr"></div>
+          <div class="wheel wheel-bl"></div>
+          <div class="wheel wheel-br"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-display">
+      <div class="label">SCORE</div>
+      <div class="score-value" id="scoreValue">0</div>
+    </div>
+    <div class="lives-display" id="livesDisplay"></div>
+
+
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div class="game-over-screen" id="gameOverScreen">
+    <h1>Great Job Reed!</h1>
+    <div class="final-score" id="finalScore">0</div>
+    <div class="final-label">obstacles dodged!</div>
+    <div class="message" id="gameOverMessage"></div>
+    <button class="play-again-btn" onclick="resetGame()">Play Again!</button>
+  </div>
+
+  <script>
+  (function() {
+    var score = 0;
+    var lives = 5;
+    var gameActive = false;
+    var currentLetter = '';
+    var waitingForKey = false;
+    var obstacleEl = null;
+
+    var easyLetters = ['A','S','D','F','R','E','T','B','G','H','J','K','L','M','N','O','P'];
+    var obstacleColors = [
+      '#f44336','#E91E63','#9C27B0','#673AB6','#3F51B5',
+      '#2196F3','#00BCD4','#009688','#4CAF50','#8BC34A',
+      '#FF9800','#FF5722','#795548'
+    ];
+
+    var scene = document.getElementById('scene');
+    var road = document.getElementById('road');
+    var car = document.getElementById('car');
+    var scoreValue = document.getElementById('scoreValue');
+    var livesDisplay = document.getElementById('livesDisplay');
+    var feedback = document.getElementById('feedback');
+    var gameScreen = document.getElementById('gameScreen');
+    var startScreen = document.getElementById('startScreen');
+    var gameOverScreen = document.getElementById('gameOverScreen');
+
+    function createRoadLines() {
+      road.querySelectorAll('.road-line').forEach(function(l) { l.remove(); });
+      for (var i = 0; i < 10; i++) {
+        var line = document.createElement('div');
+        line.className = 'road-line';
+        line.style.top = (i * 100 + 20) + 'px';
+        road.appendChild(line);
+      }
+    }
+
+    function updateLives() {
+      var hearts = '';
+      for (var i = 0; i < lives; i++) hearts += '\u2764\uFE0F ';
+      for (var i = lives; i < 5; i++) hearts += '\uD83E\uDD0D ';
+      livesDisplay.textContent = hearts;
+    }
+
+    function pickLetter() {
+      var next;
+      do {
+        next = easyLetters[Math.floor(Math.random() * easyLetters.length)];
+      } while (next === currentLetter);
+      currentLetter = next;
+    }
+
+    function driveToNextObstacle(callback) {
+      // Start driving animation
+      road.classList.add('driving');
+      car.classList.add('car-driving');
+
+      setTimeout(function() {
+        // Stop driving
+        road.classList.remove('driving');
+        car.classList.remove('car-driving');
+        callback();
+      }, 1000);
+    }
+
+    function spawnObstacle() {
+      if (obstacleEl) obstacleEl.remove();
+
+      pickLetter();
+
+      obstacleEl = document.createElement('div');
+      obstacleEl.className = 'obstacle obstacle-enter';
+      obstacleEl.style.background = obstacleColors[Math.floor(Math.random() * obstacleColors.length)];
+      obstacleEl.textContent = currentLetter;
+      scene.appendChild(obstacleEl);
+
+      setTimeout(function() {
+        if (obstacleEl) obstacleEl.classList.remove('obstacle-enter');
+      }, 500);
+
+      waitingForKey = true;
+    }
+
+    function showFeedback(type, text) {
+      feedback.className = 'feedback ' + type + ' show';
+      feedback.textContent = text;
+      setTimeout(function() { feedback.className = 'feedback'; }, 800);
+    }
+
+    function spawnStars() {
+      for (var i = 0; i < 5; i++) {
+        var star = document.createElement('div');
+        star.className = 'star';
+        star.textContent = '\u2B50';
+        star.style.left = (Math.random() * 60 + 20) + '%';
+        star.style.top = (Math.random() * 30 + 30) + '%';
+        gameScreen.appendChild(star);
+        (function(s) { setTimeout(function() { s.remove(); }, 1000); })(star);
+      }
+    }
+
+    function dodgeObstacle() {
+      waitingForKey = false;
+      score++;
+      scoreValue.textContent = score;
+      showFeedback('correct', 'YES!');
+      spawnStars();
+
+      var dodge = Math.random() > 0.5 ? 'dodge-left' : 'dodge-right';
+      car.classList.add(dodge);
+      setTimeout(function() { car.classList.remove(dodge); }, 500);
+
+      if (obstacleEl) {
+        obstacleEl.style.transition = 'transform 0.4s ease, opacity 0.4s';
+        obstacleEl.style.transform = 'translateX(-50%) scale(0.2)';
+        obstacleEl.style.opacity = '0';
+        var oldObs = obstacleEl;
+        obstacleEl = null;
+        setTimeout(function() {
+          oldObs.remove();
+          if (gameActive) {
+            driveToNextObstacle(function() {
+              if (gameActive) spawnObstacle();
+            });
+          }
+        }, 500);
+      }
+    }
+
+    function hitObstacle() {
+      waitingForKey = false;
+      lives--;
+      updateLives();
+      showFeedback('wrong', 'OOPS!');
+
+      gameScreen.classList.add('shake');
+      setTimeout(function() { gameScreen.classList.remove('shake'); }, 400);
+
+      if (obstacleEl) {
+        obstacleEl.style.background = '#f44336';
+        obstacleEl.style.transition = 'transform 0.3s ease, opacity 0.3s';
+        obstacleEl.style.transform = 'translateX(-50%) scale(1.4)';
+        var oldObs = obstacleEl;
+        obstacleEl = null;
+        setTimeout(function() {
+          oldObs.style.opacity = '0';
+          setTimeout(function() {
+            oldObs.remove();
+            if (lives <= 0) {
+              endGame();
+            } else if (gameActive) {
+              driveToNextObstacle(function() {
+                if (gameActive) spawnObstacle();
+              });
+            }
+          }, 300);
+        }, 300);
+      }
+    }
+
+    function handleKeyPress(e) {
+      if (!gameActive || !waitingForKey) return;
+      var pressed = e.key.toUpperCase();
+      if (pressed.length === 1 && pressed >= 'A' && pressed <= 'Z') {
+        if (pressed === currentLetter) {
+          dodgeObstacle();
+        } else {
+          hitObstacle();
+        }
+      }
+    }
+
+    function endGame() {
+      gameActive = false;
+      gameScreen.style.display = 'none';
+      gameOverScreen.style.display = 'flex';
+      document.getElementById('finalScore').textContent = score;
+
+      var msg = '';
+      if (score >= 20) msg = 'You are a SUPER racer!';
+      else if (score >= 10) msg = 'Amazing driving, Reed!';
+      else if (score >= 5) msg = 'Great job, keep practicing!';
+      else msg = 'Nice try! Play again!';
+      document.getElementById('gameOverMessage').textContent = msg;
+    }
+
+    window.startGame = function() {
+      startScreen.style.display = 'none';
+      gameOverScreen.style.display = 'none';
+      gameScreen.style.display = 'block';
+
+      score = 0;
+      lives = 5;
+      gameActive = true;
+      scoreValue.textContent = '0';
+      updateLives();
+      createRoadLines();
+
+      setTimeout(function() { spawnObstacle(); }, 400);
+    };
+
+    window.resetGame = function() {
+      if (obstacleEl) { obstacleEl.remove(); obstacleEl = null; }
+      window.startGame();
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+  })();
+  </script>
+</body>
+</html>
