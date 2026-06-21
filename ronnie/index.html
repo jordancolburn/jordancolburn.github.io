@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Ronnie's Radio Reels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#1c1612;
+  --bg-deep:#140f0c;
+  --surface:#271e18;
+  --surface-up:#322620;
+  --line:#3a2c22;
+  --amber:#e9a23c;
+  --amber-soft:#f1c477;
+  --amber-dim:#a07a40;
+  --cream:#f2e8d7;
+  --taupe:#c4af94;
+  --taupe-dim:#8a7660;
+  --oxide:#7a5230;
+  --glow:0 0 22px rgba(233,162,60,.28);
+  --transport-h:128px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Figtree",system-ui,-apple-system,sans-serif;
+  color:var(--cream);
+  background:var(--bg-deep);
+  background-image:radial-gradient(120% 80% at 50% -10%, #2a1f17 0%, var(--bg) 38%, var(--bg-deep) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:calc(var(--transport-h) + env(safe-area-inset-bottom, 0px) + 24px);
+}
+h1,h2,h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;margin:0;letter-spacing:-.01em}
+.mono{font-family:"Space Mono",ui-monospace,monospace}
+button{font-family:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--amber-soft);outline-offset:3px;border-radius:6px}
+
+/* ── Header ─────────────────────────────────────────── */
+.wrap{max-width:880px;margin:0 auto;padding:0 20px}
+header{padding:54px 0 26px;text-align:center}
+.dial{
+  width:54px;height:54px;margin:0 auto 18px;border-radius:50%;
+  background:radial-gradient(circle at 50% 40%, var(--amber-soft), var(--amber) 42%, #6b4a22 100%);
+  box-shadow:0 0 0 6px rgba(233,162,60,.08), 0 0 34px 6px rgba(233,162,60,.34), inset 0 -3px 8px rgba(0,0,0,.4);
+}
+h1{font-size:clamp(2rem,5.5vw,3rem);color:var(--cream)}
+.subtitle{margin:14px auto 0;max-width:36rem;color:var(--taupe);font-size:1.05rem}
+.notice{margin:16px auto 0;max-width:34rem;color:var(--amber-soft);font-size:.92rem;
+  display:inline-flex;align-items:center;gap:9px;padding:9px 16px;border-radius:999px;
+  background:rgba(233,162,60,.09);border:1px solid var(--amber-dim)}
+.notice svg{width:16px;height:16px;fill:var(--amber);flex:0 0 auto}
+.notice[hidden]{display:none}
+
+/* ── Reel list ──────────────────────────────────────── */
+.reels{display:flex;flex-direction:column;gap:16px;margin:34px 0 40px}
+.reel{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+  transition:border-color .25s, box-shadow .25s;
+}
+.reel.playing{border-color:var(--amber-dim);box-shadow:var(--glow)}
+.reel-head{display:flex;gap:16px;align-items:center;padding:16px 18px}
+.thumb{
+  flex:0 0 auto;width:64px;height:64px;border-radius:10px;overflow:hidden;
+  background:var(--bg-deep);border:1px solid var(--line);position:relative;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .ph{font-size:.62rem;color:var(--taupe-dim);text-align:center;line-height:1.25;padding:4px}
+.reel-meta{flex:1;min-width:0}
+.reel-meta h2{font-size:1.3rem;color:var(--cream)}
+.reel-meta .note{color:var(--taupe-dim);font-size:.9rem;margin-top:2px}
+.reel-meta .sub{color:var(--taupe);font-size:.9rem;margin-top:2px}
+
+.sides{display:flex;gap:10px;padding:0 18px 16px}
+.side-group{flex:1;display:flex;gap:8px;min-width:0}
+.side-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:13px 10px;border-radius:11px;font-size:1rem;font-weight:600;
+  background:var(--surface-up);border:1px solid var(--line);color:var(--cream);
+  transition:background .18s,border-color .18s,color .18s;min-height:50px;
+}
+.side-btn:hover{background:#3b2d24}
+.side-btn .ico{width:13px;height:13px;border-radius:50%;border:2px solid var(--taupe-dim);flex:0 0 auto}
+.side-btn.active{background:rgba(233,162,60,.14);border-color:var(--amber-dim);color:var(--amber-soft)}
+.side-btn.active .ico{border-color:var(--amber);background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.side-btn.empty{opacity:.6;cursor:not-allowed}
+.side-btn.empty .ico{border-style:dashed}
+.side-btn .soon{font-size:.74rem;color:var(--taupe-dim);font-weight:500}
+.side-btn .soon::before{content:"·";margin:0 5px;color:var(--taupe-dim)}
+.dl-side{
+  flex:0 0 auto;width:50px;display:flex;align-items:center;justify-content:center;
+  background:var(--surface-up);border:1px solid var(--line);border-radius:11px;color:var(--taupe);
+  text-decoration:none;transition:background .18s,color .18s,border-color .18s;
+}
+.dl-side:hover{background:#3b2d24;color:var(--amber-soft);border-color:var(--amber-dim)}
+.dl-side svg{width:19px;height:19px;fill:currentColor}
+
+.tracklist{
+  border-top:1px solid var(--line);
+  background:rgba(0,0,0,.16);
+  padding:6px;display:none;
+}
+.tracklist.open{display:block}
+.track{
+  width:100%;display:flex;align-items:center;gap:12px;text-align:left;
+  padding:11px 12px;border-radius:9px;background:transparent;border:0;color:var(--taupe);
+  font-size:1rem;transition:background .15s,color .15s;
+}
+.track:hover{background:var(--surface-up);color:var(--cream)}
+.track .t-time{font-size:.86rem;color:var(--taupe-dim);flex:0 0 auto;min-width:64px}
+.track .t-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track.active{color:var(--amber-soft)}
+.track.active .t-time{color:var(--amber-dim)}
+.track .eq{display:none;gap:2px;align-items:flex-end;height:13px;flex:0 0 auto}
+.track.active .eq{display:flex}
+.track .eq span{width:3px;background:var(--amber);border-radius:1px;animation:eq .9s ease-in-out infinite}
+.track .eq span:nth-child(2){animation-delay:.25s}
+.track .eq span:nth-child(3){animation-delay:.5s}
+@keyframes eq{0%,100%{height:4px}50%{height:13px}}
+
+.tracklist .empty-note{padding:12px;color:var(--taupe-dim);font-size:.9rem;font-style:italic}
+
+/* ── Transport ──────────────────────────────────────── */
+.transport{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:linear-gradient(180deg, #221a14 0%, var(--bg-deep) 100%);
+  border-top:1px solid var(--line);
+  box-shadow:0 -10px 40px rgba(0,0,0,.5);
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  transform:translateY(110%);transition:transform .4s cubic-bezier(.2,.8,.2,1);
+}
+.transport.up{transform:none}
+.transport-inner{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:9px}
+.now{display:flex;align-items:center;gap:14px;min-width:0}
+.cover{
+  flex:0 0 auto;width:56px;height:56px;border-radius:9px;overflow:hidden;background:var(--bg);
+  border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover .ph{font-size:.55rem;color:var(--taupe-dim);text-align:center;line-height:1.2;padding:3px}
+
+/* tape deck face */
+.deck{flex:0 0 auto;color:var(--amber-dim)}
+.deck svg{display:block}
+.reelspin{transform-box:fill-box;transform-origin:center;}
+.deck.spinning .reelspin{animation:spin 2.6s linear infinite}
+@keyframes spin{to{transform:rotate(-360deg)}}
+
+.now-text{flex:1;min-width:0}
+.now-label{font-size:.78rem;color:var(--amber-dim);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+.now-track{font-size:1.08rem;color:var(--cream);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.counter{font-size:.82rem;color:var(--taupe);margin-top:1px}
+.counter .sep{color:var(--taupe-dim)}
+
+.controls{display:flex;align-items:center;gap:8px}
+.ctl{
+  background:var(--surface-up);border:1px solid var(--line);border-radius:50%;
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--cream);
+  transition:background .15s,border-color .15s,transform .08s;flex:0 0 auto;
+}
+.ctl:hover{background:#3f3027}
+.ctl:active{transform:scale(.93)}
+.ctl svg{width:20px;height:20px;fill:currentColor}
+.ctl.play{
+  width:56px;height:56px;background:radial-gradient(circle at 50% 35%, var(--amber-soft), var(--amber) 55%, #b87a28 100%);
+  border-color:var(--amber);color:#241608;box-shadow:0 0 18px rgba(233,162,60,.4);
+}
+.ctl.play:hover{background:radial-gradient(circle at 50% 35%, #f7d292, var(--amber-soft) 55%, var(--amber) 100%)}
+.ctl.play svg{width:26px;height:26px}
+.ctl.skip{width:40px;height:40px;color:var(--taupe)}
+.ctl.skip:hover{color:var(--cream)}
+.ctl.skip svg{width:24px;height:24px;fill:none}
+
+.seekrow{display:flex;align-items:center;gap:11px}
+.time{font-size:.8rem;color:var(--taupe);flex:0 0 auto;min-width:48px;text-align:center}
+.time.cur{color:var(--amber-soft)}
+
+input[type=range]{
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;height:22px;flex:1;min-width:0;margin:0;
+}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;
+  background:linear-gradient(90deg, var(--amber) var(--p,0%), var(--line) var(--p,0%));}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--amber)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;
+  background:var(--amber-soft);margin-top:-6px;box-shadow:0 0 8px rgba(233,162,60,.5);border:2px solid #2a1c10}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--amber-soft);border:2px solid #2a1c10;box-shadow:0 0 8px rgba(233,162,60,.5)}
+
+.vol{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:128px}
+.vol svg{width:18px;height:18px;fill:var(--taupe);flex:0 0 auto}
+.vol input[type=range]{flex:1}
+
+.qbtn{
+  flex:0 0 auto;background:var(--surface-up);border:1px solid var(--line);border-radius:8px;
+  color:var(--taupe);font-size:.78rem;font-weight:600;padding:7px 11px;letter-spacing:.02em;
+}
+.qbtn[hidden]{display:none}
+.qbtn .on{color:var(--amber-soft)}
+.dl-now{
+  flex:0 0 auto;background:var(--surface-up);border:1px solid var(--line);border-radius:8px;
+  color:var(--taupe);display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;
+  padding:7px 11px;text-decoration:none;transition:background .15s,color .15s,border-color .15s;
+}
+.dl-now:hover{background:#3f3027;color:var(--amber-soft);border-color:var(--amber-dim)}
+.dl-now svg{width:15px;height:15px;fill:currentColor}
+.dl-now[hidden]{display:none}
+.dl-now .lbl{display:inline}
+@media (max-width:560px){.dl-now .lbl{display:none}}
+
+/* ── Lightbox ───────────────────────────────────────── */
+.lightbox{
+  position:fixed;inset:0;z-index:80;background:rgba(8,5,3,.9);
+  display:none;align-items:center;justify-content:center;padding:24px;
+  backdrop-filter:blur(3px);
+}
+.lightbox.open{display:flex}
+.lightbox img{max-width:92vw;max-height:86vh;border-radius:12px;box-shadow:0 20px 80px rgba(0,0,0,.7);border:1px solid var(--line)}
+.lightbox .lb-close{position:absolute;top:18px;right:20px;width:46px;height:46px;border-radius:50%;
+  background:rgba(0,0,0,.5);border:1px solid var(--line);color:var(--cream);font-size:1.4rem}
+.lightbox .lb-count{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+  color:var(--taupe);font-size:.85rem;background:rgba(0,0,0,.5);padding:5px 12px;border-radius:20px}
+
+footer{text-align:center;color:var(--taupe-dim);font-size:.84rem;padding:8px 0 26px}
+
+@media (max-width:560px){
+  :root{--transport-h:150px}
+  header{padding:38px 0 18px}
+  .vol{display:none}
+  .counter .total{display:none}
+  .ctl{width:42px;height:42px}
+  .ctl.play{width:52px;height:52px}
+  .ctl.skip{width:40px;height:40px}
+  #prev,#next{display:none}
+  .reel-head{padding:14px}
+  .sides{padding:0 14px 14px}
+}
+@media (prefers-reduced-motion:reduce){
+  .deck.spinning .reelspin{animation:none}
+  .track .eq span{animation:none;height:9px}
+  .transport{transition:none}
+}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="dial" aria-hidden="true"></div>
+      <h1 id="site-title">Ronnie's Radio Reels</h1>
+      <p class="subtitle" id="site-subtitle"></p>
+      <div class="notice" id="site-notice" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a5 5 0 110 10 5 5 0 010-10zm0 3.2a1.8 1.8 0 100 3.6 1.8 1.8 0 000-3.6z"/></svg>
+        <span id="site-notice-text"></span>
+      </div>
+    </header>
+    <main id="reels" class="reels" aria-label="Reels"></main>
+  </div>
+
+  <!-- Transport -->
+  <div class="transport" id="transport" role="region" aria-label="Player">
+    <div class="transport-inner">
+      <div class="now">
+        <button class="cover" id="cover" aria-label="Open photo" type="button">
+          <span class="ph">no photo<br>yet</span>
+        </button>
+        <div class="deck" id="deck" aria-hidden="true">
+          <svg width="78" height="44" viewBox="0 0 78 44" fill="none">
+            <!-- tape path -->
+            <path d="M16 22 C 28 31, 50 31, 62 22" stroke="var(--oxide)" stroke-width="2.2" fill="none" opacity="0.8"/>
+            <!-- head -->
+            <rect x="36" y="27" width="6" height="9" rx="1.5" fill="var(--taupe-dim)"/>
+            <!-- left reel -->
+            <g class="reelspin" id="reelL">
+              <circle cx="16" cy="18" r="14" stroke="currentColor" stroke-width="2"/>
+              <circle cx="16" cy="18" r="3.4" fill="currentColor"/>
+              <circle cx="16" cy="9"  r="1.9" fill="currentColor"/>
+              <circle cx="23.8" cy="22.5" r="1.9" fill="currentColor"/>
+              <circle cx="8.2" cy="22.5" r="1.9" fill="currentColor"/>
+            </g>
+            <!-- right reel -->
+            <g class="reelspin" id="reelR">
+              <circle cx="62" cy="18" r="14" stroke="currentColor" stroke-width="2"/>
+              <circle cx="62" cy="18" r="3.4" fill="currentColor"/>
+              <circle cx="62" cy="9"  r="1.9" fill="currentColor"/>
+              <circle cx="69.8" cy="22.5" r="1.9" fill="currentColor"/>
+              <circle cx="54.2" cy="22.5" r="1.9" fill="currentColor"/>
+            </g>
+          </svg>
+        </div>
+        <div class="now-text">
+          <div class="now-label" id="now-label">—</div>
+          <div class="now-track" id="now-track">Pick a side to start</div>
+          <div class="counter mono"><span id="c-cur">0:00</span><span class="sep total"> / </span><span class="total" id="c-total">0:00</span></div>
+        </div>
+        <div class="controls">
+          <button class="ctl skip" id="back30" aria-label="Back 30 seconds" type="button">
+            <svg viewBox="0 0 24 24" fill="none">
+              <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12a8 8 0 1 0 2.3-5.6"/>
+                <path d="M6 3.6v3.1h3.1"/>
+              </g>
+              <text x="12.5" y="15.4" text-anchor="middle" font-family="'Space Mono',monospace" font-weight="700" font-size="7" fill="currentColor">30</text>
+            </svg>
+          </button>
+          <button class="ctl" id="prev" aria-label="Previous track" type="button">
+            <svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zm3.5 7l8.5 7V5z"/></svg>
+          </button>
+          <button class="ctl play" id="play" aria-label="Play" type="button">
+            <svg viewBox="0 0 24 24" id="play-ico"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="ctl" id="next" aria-label="Next track" type="button">
+            <svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zm-1.5 7L6 5v14z"/></svg>
+          </button>
+          <button class="ctl skip" id="fwd30" aria-label="Forward 30 seconds" type="button">
+            <svg viewBox="0 0 24 24" fill="none">
+              <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 12a8 8 0 1 1-2.3-5.6"/>
+                <path d="M18 3.6v3.1h-3.1"/>
+              </g>
+              <text x="11.5" y="15.4" text-anchor="middle" font-family="'Space Mono',monospace" font-weight="700" font-size="7" fill="currentColor">30</text>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="seekrow">
+        <span class="time cur mono" id="t-cur">0:00</span>
+        <input type="range" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek" />
+        <span class="time mono" id="t-dur">0:00</span>
+        <div class="vol">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 00-2.5-4v8a4.5 4.5 0 002.5-4z"/></svg>
+          <input type="range" id="vol" min="0" max="100" value="100" aria-label="Volume" />
+        </div>
+        <a class="dl-now" id="dl-now" hidden download href="#" aria-label="Download this side">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10.6l3.3-3.3 1.4 1.4L12 17l-4.7-5.3 1.4-1.4 3.3 3.3V3h-1zm-7 15h14v2H5z"/></svg>
+          <span class="lbl">Download</span>
+        </a>
+        <button class="qbtn" id="qbtn" hidden type="button" aria-label="Audio quality">
+          <span class="on">Full</span> / Saver
+        </button>
+      </div>
+    </div>
+  </div>
+  <audio id="audio" preload="metadata"></audio>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <button class="lb-close" id="lb-close" aria-label="Close" type="button">✕</button>
+    <img id="lb-img" alt="Reel box photo" />
+    <div class="lb-count mono" id="lb-count"></div>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+  (function(){
+    "use strict";
+    var D = window.SITE_DATA || {reels:[]};
+    var LS = "radioReels:";
+
+    // ── time helpers ────────────────────────────────────
+    function parseTime(v){
+      if (typeof v === "number") return v;
+      if (v == null) return 0;
+      var s = String(v).trim();
+      if (s === "") return 0;
+      if (/^\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+      var parts = s.split(":").map(function(p){return parseFloat(p)||0;});
+      var sec = 0;
+      for (var i=0;i<parts.length;i++) sec = sec*60 + parts[i];
+      return sec;
+    }
+    function fmt(sec){
+      sec = Math.max(0, Math.floor(sec||0));
+      var h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+      var mm = (h>0 ? String(m).padStart(2,"0") : String(m));
+      var ss = String(s).padStart(2,"0");
+      return (h>0 ? h+":"+mm+":"+ss : mm+":"+ss);
+    }
+
+    // ── build a flat list of sides for cross-reel nav ───
+    var SIDES = []; // {reelIdx, sideIdx, reel, side, tracks(sorted)}
+    D.reels.forEach(function(reel, ri){
+      (reel.sides||[]).forEach(function(side, si){
+        var tracks = (side.tracks||[]).map(function(t){
+          return {title: t.title || "Untitled", start: parseTime(t.start)};
+        }).sort(function(a,b){return a.start-b.start;});
+        SIDES.push({reelIdx:ri, sideIdx:si, reel:reel, side:side, tracks:tracks});
+      });
+    });
+    function sideKey(s){ return s.reelIdx+"-"+s.sideIdx; }
+    function findGlobal(ri, si){
+      for (var i=0;i<SIDES.length;i++) if (SIDES[i].reelIdx===ri && SIDES[i].sideIdx===si) return i;
+      return -1;
+    }
+
+    // any audioLow anywhere? → quality toggle
+    var HAS_LOW = SIDES.some(function(s){ return !!s.side.audioLow; });
+
+    // ── DOM refs ────────────────────────────────────────
+    var audio = document.getElementById("audio");
+    var elReels = document.getElementById("reels");
+    var transport = document.getElementById("transport");
+    var deck = document.getElementById("deck");
+    var elCover = document.getElementById("cover");
+    var elNowLabel = document.getElementById("now-label");
+    var elNowTrack = document.getElementById("now-track");
+    var elCcur = document.getElementById("c-cur");
+    var elCtot = document.getElementById("c-total");
+    var elPlay = document.getElementById("play");
+    var elPlayIco = document.getElementById("play-ico");
+    var elPrev = document.getElementById("prev");
+    var elNext = document.getElementById("next");
+    var elSeek = document.getElementById("seek");
+    var elTcur = document.getElementById("t-cur");
+    var elTdur = document.getElementById("t-dur");
+    var elVol = document.getElementById("vol");
+    var elQ = document.getElementById("qbtn");
+    var elDlNow = document.getElementById("dl-now");
+
+    var ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
+    var ICON_PAUSE = '<path d="M7 5h4v14H7zm6 0h4v14h-4z"/>';
+
+    // ── state ───────────────────────────────────────────
+    var cur = -1;        // global side index
+    var curTrack = -1;
+    var saver = false;   // false = Full, true = Saver
+    var seeking = false;
+
+    document.getElementById("site-title").textContent = D.title || "Radio Reels";
+    document.getElementById("site-subtitle").textContent = D.subtitle || "";
+    document.title = D.title || "Radio Reels";
+    if (D.notice){
+      document.getElementById("site-notice-text").textContent = D.notice;
+      document.getElementById("site-notice").hidden = false;
+    }
+
+    // filename for downloads, e.g. "Dad's Radio Reels - Reel 1 - Side A.mp3"
+    function downloadNameFor(s, src){
+      var ext = ((src||"").split("?")[0].match(/\.(\w{2,4})$/) || [,"mp3"])[1];
+      var base = [D.title, (s.reel.title||("Reel "+(s.reelIdx+1))), (s.side.label||("Side "+(s.sideIdx+1)))]
+        .filter(Boolean).join(" - ").replace(/[\\/:*?"<>|]+/g," ").trim();
+      return base + "." + ext;
+    }
+    function downloadNameFull(s){ return downloadNameFor(s, s.side.audio); }
+
+    // ── preferences ─────────────────────────────────────
+    try {
+      var v = localStorage.getItem(LS+"vol");
+      if (v != null){ audio.volume = Math.min(1,Math.max(0,parseFloat(v))); elVol.value = Math.round(audio.volume*100); }
+      else { audio.volume = 1; }
+      saver = localStorage.getItem(LS+"saver") === "1";
+    } catch(e){ audio.volume = 1; }
+    setRangeFill(elVol);
+
+    if (HAS_LOW){
+      elQ.hidden = false;
+      renderQ();
+      elQ.addEventListener("click", function(){
+        saver = !saver;
+        try{ localStorage.setItem(LS+"saver", saver?"1":"0"); }catch(e){}
+        renderQ();
+        if (cur >= 0) swapSource();
+      });
+    }
+    function renderQ(){
+      elQ.innerHTML = saver
+        ? 'Full / <span class="on">Saver</span>'
+        : '<span class="on">Full</span> / Saver';
+    }
+    function srcFor(s){
+      if (saver && s.side.audioLow) return s.side.audioLow;
+      return s.side.audio || "";
+    }
+
+    // ── photo helpers ───────────────────────────────────
+    function firstPhoto(reel){
+      return (reel.photos && reel.photos.length) ? reel.photos[0] : null;
+    }
+
+    // ── render reel cards ───────────────────────────────
+    function render(){
+      elReels.innerHTML = "";
+      D.reels.forEach(function(reel, ri){
+        var card = document.createElement("section");
+        card.className = "reel";
+        card.dataset.reel = ri;
+
+        var head = document.createElement("div");
+        head.className = "reel-head";
+
+        var thumb = document.createElement("button");
+        thumb.className = "thumb";
+        thumb.type = "button";
+        thumb.setAttribute("aria-label", "Photos for " + (reel.title||"reel"));
+        var ph = firstPhoto(reel);
+        if (ph){
+          var img = document.createElement("img");
+          img.alt = (reel.title||"Reel") + " box";
+          img.loading = "lazy";
+          img.src = ph;
+          img.onerror = function(){ thumb.innerHTML = '<span class="ph">no photo<br>yet</span>'; };
+          thumb.appendChild(img);
+        } else {
+          thumb.innerHTML = '<span class="ph">no photo<br>yet</span>';
+        }
+        thumb.addEventListener("click", function(){ openLightbox(reel); });
+
+        var meta = document.createElement("div");
+        meta.className = "reel-meta";
+        var sidesAdded = (reel.sides||[]).filter(function(s){return s.audio;}).length;
+        var subTxt = sidesAdded ? (sidesAdded + " of " + (reel.sides||[]).length + " sides ready")
+                                : "Audio coming soon";
+        meta.innerHTML = '<h2></h2>' +
+          (reel.note ? '<div class="note"></div>' : '') +
+          '<div class="sub"></div>';
+        meta.querySelector("h2").textContent = reel.title || ("Reel " + (ri+1));
+        if (reel.note) meta.querySelector(".note").textContent = reel.note;
+        meta.querySelector(".sub").textContent = subTxt;
+
+        head.appendChild(thumb);
+        head.appendChild(meta);
+        card.appendChild(head);
+
+        // sides
+        var sidesRow = document.createElement("div");
+        sidesRow.className = "sides";
+        (reel.sides||[]).forEach(function(side, si){
+          var g = findGlobal(ri, si);
+          var s = SIDES[g];
+          var group = document.createElement("div");
+          group.className = "side-group";
+
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "side-btn" + (side.audio ? "" : " empty");
+          btn.dataset.global = g;
+          var labelTxt = side.label || ("Side " + (si+1));
+          if (side.audio){
+            btn.innerHTML = '<span class="ico"></span><span class="s-label"></span>';
+            btn.querySelector(".s-label").textContent = labelTxt;
+            btn.addEventListener("click", function(){ playSide(g, null, true); });
+          } else {
+            btn.innerHTML = '<span class="ico"></span><span class="s-label"></span><span class="soon">coming soon</span>';
+            btn.querySelector(".s-label").textContent = labelTxt;
+            btn.title = "Coming soon";
+            btn.setAttribute("aria-disabled","true");
+          }
+          group.appendChild(btn);
+          sidesRow.appendChild(group);
+        });
+        card.appendChild(sidesRow);
+
+        // tracklist (one shared, shows for active side)
+        var tl = document.createElement("div");
+        tl.className = "tracklist";
+        tl.dataset.reel = ri;
+        card.appendChild(tl);
+
+        elReels.appendChild(card);
+      });
+    }
+
+    function renderTracklist(globalIdx){
+      // clear all
+      document.querySelectorAll(".tracklist").forEach(function(t){ t.classList.remove("open"); t.innerHTML=""; });
+      if (globalIdx < 0) return;
+      var s = SIDES[globalIdx];
+      var card = elReels.querySelector('.reel[data-reel="'+s.reelIdx+'"]');
+      if (!card) return;
+      var tl = card.querySelector(".tracklist");
+      tl.innerHTML = "";
+      var named = s.tracks.filter(function(t){ return t.title && !/^untitled/i.test(t.title); });
+      if (s.tracks.length <= 1 && named.length === 0){
+        var note = document.createElement("div");
+        note.className = "empty-note";
+        note.textContent = "Track names can be added later — playing " + (s.side.label||"this side") + " straight through.";
+        tl.appendChild(note);
+        tl.classList.add("open");
+        return;
+      }
+      s.tracks.forEach(function(tr, idx){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "track";
+        b.dataset.track = idx;
+        b.innerHTML = '<span class="t-time mono"></span>' +
+                      '<span class="t-name"></span>' +
+                      '<span class="eq" aria-hidden="true"><span></span><span></span><span></span></span>';
+        b.querySelector(".t-time").textContent = fmt(tr.start);
+        b.querySelector(".t-name").textContent = tr.title;
+        b.addEventListener("click", function(){
+          audio.currentTime = tr.start;
+          setTrack(idx);
+          play();
+        });
+        tl.appendChild(b);
+      });
+      tl.classList.add("open");
+    }
+
+    function markActiveTrackUI(){
+      var card = cur>=0 ? elReels.querySelector('.reel[data-reel="'+SIDES[cur].reelIdx+'"]') : null;
+      if (!card) return;
+      card.querySelectorAll(".track").forEach(function(b){
+        b.classList.toggle("active", parseInt(b.dataset.track,10) === curTrack);
+      });
+    }
+
+    // ── load + play a side ──────────────────────────────
+    function playSide(globalIdx, seekTo, autoplay){
+      if (globalIdx < 0 || globalIdx >= SIDES.length) return;
+      var s = SIDES[globalIdx];
+      if (!srcFor(s)){ return; }
+      cur = globalIdx;
+      curTrack = -1;
+
+      // resume position
+      var startAt = (typeof seekTo === "number") ? seekTo : loadResume(s);
+
+      audio.src = srcFor(s);
+      audio.load();
+
+      transport.classList.add("up");
+      updateNowMeta();
+      renderTracklist(globalIdx);
+      markPlayingCard();
+
+      var applyStart = function(){
+        if (startAt > 0 && isFinite(audio.duration)){
+          if (startAt < audio.duration - 4) audio.currentTime = startAt;
+        }
+        updateTrackFromTime();
+        audio.removeEventListener("loadedmetadata", applyStart);
+      };
+      audio.addEventListener("loadedmetadata", applyStart);
+
+      if (autoplay !== false) play();
+      updateCounter();
+    }
+
+    function swapSource(){
+      // toggle quality preserving position + play state
+      var s = SIDES[cur];
+      var pos = audio.currentTime;
+      var wasPlaying = !audio.paused;
+      var src = srcFor(s);
+      elDlNow.href = src;
+      elDlNow.setAttribute("download", downloadNameFor(s, src));
+      audio.src = src;
+      audio.load();
+      audio.addEventListener("loadedmetadata", function once(){
+        audio.currentTime = pos;
+        if (wasPlaying) play();
+        audio.removeEventListener("loadedmetadata", once);
+      });
+    }
+
+    function updateNowMeta(){
+      var s = SIDES[cur];
+      elNowLabel.textContent = (s.reel.title||("Reel "+(s.reelIdx+1))) + " · " + (s.side.label||("Side "+(s.sideIdx+1)));
+      // download current side (matches the active Full/Saver source)
+      var src = srcFor(s);
+      if (src){
+        elDlNow.href = src;
+        elDlNow.setAttribute("download", downloadNameFor(s, src));
+        elDlNow.hidden = false;
+      } else {
+        elDlNow.hidden = true;
+      }
+      // cover
+      var ph = firstPhoto(s.reel);
+      elCover.innerHTML = "";
+      if (ph){
+        var img = document.createElement("img");
+        img.alt = "Cover";
+        img.src = ph;
+        img.onerror = function(){ elCover.innerHTML = '<span class="ph">no photo<br>yet</span>'; };
+        elCover.appendChild(img);
+      } else {
+        elCover.innerHTML = '<span class="ph">no photo<br>yet</span>';
+      }
+    }
+
+    function markPlayingCard(){
+      elReels.querySelectorAll(".reel").forEach(function(c){ c.classList.remove("playing"); });
+      elReels.querySelectorAll(".side-btn").forEach(function(b){ b.classList.remove("active"); });
+      if (cur < 0) return;
+      var s = SIDES[cur];
+      var card = elReels.querySelector('.reel[data-reel="'+s.reelIdx+'"]');
+      if (card){
+        card.classList.add("playing");
+        var btn = card.querySelector('.side-btn[data-global="'+cur+'"]');
+        if (btn) btn.classList.add("active");
+      }
+    }
+
+    // ── track tracking ──────────────────────────────────
+    function currentTrackIndex(t){
+      var tracks = SIDES[cur].tracks, idx = 0;
+      for (var i=0;i<tracks.length;i++){ if (t >= tracks[i].start - 0.25) idx = i; else break; }
+      return idx;
+    }
+    function setTrack(idx){
+      if (idx === curTrack) return;
+      curTrack = idx;
+      var tr = SIDES[cur].tracks[idx];
+      elNowTrack.textContent = tr ? tr.title : (SIDES[cur].side.label||"Playing");
+      markActiveTrackUI();
+    }
+    function updateTrackFromTime(){
+      if (cur < 0) return;
+      var idx = currentTrackIndex(audio.currentTime);
+      setTrack(idx);
+    }
+
+    // ── playback ────────────────────────────────────────
+    function play(){
+      var p = audio.play();
+      if (p && p.catch) p.catch(function(){});
+    }
+    function pause(){ audio.pause(); }
+    function togglePlay(){
+      if (cur < 0){
+        // start first ready side
+        var first = SIDES.findIndex(function(s){ return srcFor(s); });
+        if (first >= 0) playSide(first, null, true);
+        return;
+      }
+      if (audio.paused) play(); else pause();
+    }
+
+    audio.addEventListener("play", function(){
+      elPlayIco.innerHTML = ICON_PAUSE;
+      elPlay.setAttribute("aria-label","Pause");
+      deck.classList.add("spinning");
+    });
+    audio.addEventListener("pause", function(){
+      elPlayIco.innerHTML = ICON_PLAY;
+      elPlay.setAttribute("aria-label","Play");
+      deck.classList.remove("spinning");
+    });
+    audio.addEventListener("ended", function(){
+      // auto-advance to next ready side
+      var next = nextReadySide(cur);
+      if (next >= 0) playSide(next, 0, true);
+      else { deck.classList.remove("spinning"); }
+    });
+    audio.addEventListener("timeupdate", function(){
+      if (!seeking) updateCounter();
+      updateTrackFromTime();
+      throttleSave();
+    });
+    audio.addEventListener("loadedmetadata", function(){ updateCounter(); });
+    audio.addEventListener("error", function(){
+      if (cur>=0 && srcFor(SIDES[cur])) elNowTrack.textContent = "Couldn't load this side's audio.";
+    });
+
+    function nextReadySide(from){
+      for (var i=from+1;i<SIDES.length;i++) if (srcFor(SIDES[i])) return i;
+      return -1;
+    }
+    function prevReadySide(from){
+      for (var i=from-1;i>=0;i--) if (srcFor(SIDES[i])) return i;
+      return -1;
+    }
+
+    elPlay.addEventListener("click", togglePlay);
+
+    function nudge(d){
+      if (cur < 0) return;
+      var dur = audio.duration || 0;
+      var t = audio.currentTime + d;
+      if (t < 0) t = 0;
+      if (dur && t > dur) t = dur;
+      audio.currentTime = t;
+      updateCounter();
+      updateTrackFromTime();
+    }
+    document.getElementById("back30").addEventListener("click", function(){ nudge(-30); });
+    document.getElementById("fwd30").addEventListener("click", function(){ nudge(30); });
+
+    elNext.addEventListener("click", function(){
+      if (cur < 0) return;
+      var tracks = SIDES[cur].tracks;
+      if (curTrack < tracks.length - 1){
+        var ni = curTrack + 1;
+        audio.currentTime = tracks[ni].start;
+        setTrack(ni);
+        play();
+      } else {
+        var n = nextReadySide(cur);
+        if (n >= 0) playSide(n, 0, true);
+      }
+    });
+
+    elPrev.addEventListener("click", function(){
+      if (cur < 0) return;
+      var tracks = SIDES[cur].tracks;
+      var tStart = tracks[curTrack] ? tracks[curTrack].start : 0;
+      if (audio.currentTime - tStart > 3 || curTrack <= 0){
+        if (curTrack <= 0 && audio.currentTime - tStart <= 3){
+          // at first track start → go to previous side
+          var p = prevReadySide(cur);
+          if (p >= 0){ playSide(p, 0, true); return; }
+        }
+        audio.currentTime = tStart; // restart current
+      } else {
+        var pi = curTrack - 1;
+        audio.currentTime = tracks[pi].start;
+        setTrack(pi);
+      }
+      play();
+    });
+
+    // ── seek bar ────────────────────────────────────────
+    function updateCounter(){
+      var d = audio.duration || 0;
+      var c = audio.currentTime || 0;
+      elCcur.textContent = fmt(c);
+      elCtot.textContent = isFinite(d)&&d>0 ? fmt(d) : "—";
+      elTcur.textContent = fmt(c);
+      elTdur.textContent = isFinite(d)&&d>0 ? fmt(d) : "—";
+      if (!seeking){
+        var p = (isFinite(d)&&d>0) ? (c/d*1000) : 0;
+        elSeek.value = p;
+        elSeek.style.setProperty("--p", (p/10)+"%");
+      }
+    }
+    elSeek.addEventListener("input", function(){
+      seeking = true;
+      var d = audio.duration||0;
+      var c = (elSeek.value/1000)*d;
+      elTcur.textContent = fmt(c); elCcur.textContent = fmt(c);
+      elSeek.style.setProperty("--p", (elSeek.value/10)+"%");
+    });
+    elSeek.addEventListener("change", function(){
+      var d = audio.duration||0;
+      audio.currentTime = (elSeek.value/1000)*d;
+      seeking = false;
+      updateTrackFromTime();
+    });
+    // keyboard nudge ±15s on focused seek
+    elSeek.addEventListener("keydown", function(e){
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight"){
+        e.preventDefault();
+        audio.currentTime = Math.max(0, Math.min((audio.duration||0), audio.currentTime + (e.key==="ArrowRight"?15:-15)));
+        updateCounter();
+      }
+    });
+
+    // ── volume ──────────────────────────────────────────
+    function setRangeFill(el){
+      var pct = (el.value - el.min) / (el.max - el.min) * 100;
+      el.style.setProperty("--p", pct + "%");
+    }
+    elVol.addEventListener("input", function(){
+      audio.volume = elVol.value/100;
+      setRangeFill(elVol);
+      try{ localStorage.setItem(LS+"vol", audio.volume); }catch(e){}
+    });
+
+    // ── resume save/restore ─────────────────────────────
+    var lastSave = 0;
+    function throttleSave(){
+      var now = Date.now();
+      if (now - lastSave < 4000) return;
+      lastSave = now;
+      if (cur<0) return;
+      try{ localStorage.setItem(LS+"pos:"+sideKey(SIDES[cur]), String(audio.currentTime)); }catch(e){}
+    }
+    function loadResume(s){
+      try{
+        var v = localStorage.getItem(LS+"pos:"+sideKey(s));
+        if (v == null) return 0;
+        var sec = parseFloat(v);
+        if (!isFinite(sec) || sec < 5) return 0;
+        return sec;
+      }catch(e){ return 0; }
+    }
+    window.addEventListener("beforeunload", function(){
+      if (cur<0) return;
+      try{ localStorage.setItem(LS+"pos:"+sideKey(SIDES[cur]), String(audio.currentTime)); }catch(e){}
+    });
+
+    // ── lightbox ────────────────────────────────────────
+    var lb = document.getElementById("lightbox");
+    var lbImg = document.getElementById("lb-img");
+    var lbCount = document.getElementById("lb-count");
+    var lbPhotos = [], lbIdx = 0;
+    function openLightbox(reel){
+      var ps = (reel.photos||[]).slice();
+      if (!ps.length) return;
+      lbPhotos = ps; lbIdx = 0;
+      showLb();
+      lb.classList.add("open");
+    }
+    function showLb(){
+      lbImg.src = lbPhotos[lbIdx];
+      lbCount.textContent = lbPhotos.length>1 ? (lbIdx+1)+" / "+lbPhotos.length+"  ·  tap to cycle" : "";
+      lbCount.style.display = lbPhotos.length>1 ? "block":"none";
+    }
+    lbImg.addEventListener("error", function(){ /* keep dialog; show nothing fancy */ });
+    lbImg.addEventListener("click", function(e){
+      e.stopPropagation();
+      if (lbPhotos.length>1){ lbIdx = (lbIdx+1)%lbPhotos.length; showLb(); }
+    });
+    function closeLb(){ lb.classList.remove("open"); lbImg.src=""; }
+    document.getElementById("lb-close").addEventListener("click", closeLb);
+    lb.addEventListener("click", function(e){ if (e.target === lb) closeLb(); });
+    elCover.addEventListener("click", function(){ if (cur>=0) openLightbox(SIDES[cur].reel); });
+
+    // ── keyboard ────────────────────────────────────────
+    document.addEventListener("keydown", function(e){
+      if (e.key === "Escape" && lb.classList.contains("open")){ closeLb(); return; }
+      var tag = (e.target.tagName||"").toLowerCase();
+      var isControl = tag === "input" || tag === "button" || tag === "select" || tag === "textarea";
+      if (e.code === "Space" && !isControl){
+        e.preventDefault();
+        togglePlay();
+      }
+    });
+
+    // ── go ──────────────────────────────────────────────
+    render();
+  })();
+  </script>
+</body>
+</html>
