@@ -100,5 +100,9 @@ noFooter: true
       <span class="icon">&#x2694;&#xFE0F;</span>
       Monster Slicer
     </a>
+    <a href="/kids/grant/basketball/" class="game-card">
+      <span class="icon">&#x1F3C0;</span>
+      Basketball
+    </a>
   </div>
 </div>

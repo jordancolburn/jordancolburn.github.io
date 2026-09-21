@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grant's Basketball</title>
+  <style>
+    body { margin: 0; background: #2d3a4a; font-family: 'Comic Sans MS', cursive; text-align: center; }
+    #game { position: relative; width: 400px; max-width: 100%; margin: 0 auto; }
+    canvas { background: #fff; width: 100%; touch-action: none; display: block; }
+    #menu { position: absolute; inset: 0; background: rgba(255,255,255,0.93);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+    button { font-size: 22px; padding: 10px 24px; border-radius: 12px; border: 3px solid #e67e22;
+             background: #ffb347; cursor: pointer; font-family: inherit; }
+    a { position: absolute; top: 6px; left: 6px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <canvas id="canvas" width="400" height="600"></canvas>
+    <div id="menu"></div>
+    <a href="/kids/grant/">&larr; Back</a>
+  </div>
+
+<script>
+// ============ SETTINGS: change these numbers and see what happens! ============
+const TIME_CHOICES = [30, 60, 120];   // how many seconds you can pick
+const POINTS_PER_BASKET = 3;          // points for each basket
+const GRAVITY = 1;                  // bigger = ball falls faster
+const FLICK_POWER = .16;             // bigger = ball flies harder
+const BALL_EMOJI = '🏀';
+const HOOP_COLOR = 'orangered';
+// ===============================================================================
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const menu = document.getElementById('menu');
+
+// Where things are on the screen
+const START_X = 200, START_Y = 520;   // where the ball starts
+const HOOP_X = 200, HOOP_Y = 150;     // middle of the hoop
+const HOOP_WIDTH = 70;
+
+// Things that change while we play
+let score = 0;
+let misses = 0;
+let timeLeft = 0;
+let playing = false;
+let ballX = START_X, ballY = START_Y;
+let speedX = 0, speedY = 0;
+let flying = false;          // is the ball in the air?
+let scoredThisShot = false;
+let dragStart = null;        // where the finger/mouse went down
+let celebrationFrames = 0;   // counts down to 0 after a basket
+
+// ---------- Small functions: each one does ONE job ----------
+
+function addScore() {
+  score = score + POINTS_PER_BASKET;
+}
+
+function addMiss() {
+  misses = misses + 1;
+}
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function resetBall() {
+  ballX = START_X;
+  ballY = START_Y;
+  speedX = 0;
+  speedY = 0;
+  flying = false;
+  scoredThisShot = false;
+}
+
+function flickBall(dx, dy) {
+  speedX = dx * FLICK_POWER;
+  speedY = dy * FLICK_POWER;
+  flying = true;
+}
+
+function checkBasket(oldY) {
+  const crossedHoop = oldY < HOOP_Y && ballY >= HOOP_Y;   // ball moved down past the hoop
+  const insideHoop = Math.abs(ballX - HOOP_X) < HOOP_WIDTH / 2;
+  if (speedY > 0 && crossedHoop && insideHoop && !scoredThisShot) {
+    scoredThisShot = true;
+    addScore();
+    celebrateBasket();
+  }
+}
+
+function celebrateBasket() {
+  celebrationFrames = 60;   // show the celebration for 60 frames (about 1 second)
+}
+
+function moveBall() {
+  if (!flying) return;
+  const oldY = ballY;
+  speedY = speedY + GRAVITY;   // gravity pulls down
+  ballX = ballX + speedX;
+  ballY = ballY + speedY;
+  checkBasket(oldY);
+  if (ballY > canvas.height + 40) {   // fell off the bottom
+    if (!scoredThisShot) addMiss();
+    resetBall();
+  }
+}
+
+function tick() {
+  timeLeft = timeLeft - 1;
+  if (timeLeft <= 0) endGame();
+}
+
+function startGame(seconds) {
+  score = 0;
+  misses = 0;
+  timeLeft = seconds;
+  resetBall();
+  playing = true;
+  menu.style.display = 'none';
+  timerId = setInterval(tick, 1000);
+}
+
+function endGame() {
+  playing = false;
+  clearInterval(timerId);
+  showMenu("Time's up! Score: " + score);
+}
+
+// ---------- Drawing ----------
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Backboard (turns green while celebrating)
+  if (celebrationFrames > 0) {
+    ctx.fillStyle = 'darkgreen';
+    ctx.fillRect(HOOP_X - 60, HOOP_Y - 70, 120, 70);
+  }
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(HOOP_X - 60, HOOP_Y - 70, 120, 70);
+
+  // Net (lines hanging down)
+  for (let i = -3; i <= 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(HOOP_X + i * 10, HOOP_Y);
+    ctx.lineTo(HOOP_X + i * 5, HOOP_Y + 60);
+    ctx.stroke();
+  }
+
+  // Hoop
+  ctx.strokeStyle = HOOP_COLOR;
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(HOOP_X - HOOP_WIDTH / 2, HOOP_Y);
+  ctx.lineTo(HOOP_X + HOOP_WIDTH / 2, HOOP_Y);
+  ctx.stroke();
+
+  // Ball
+  ctx.font = '50px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(BALL_EMOJI, ballX, ballY);
+
+  // Celebration message on the backboard, floats upward
+  if (celebrationFrames > 0) {
+    ctx.fillStyle = 'green';
+    ctx.font = 'bold 18px Comic Sans MS, cursive';
+    ctx.textAlign = 'center';
+    ctx.fillText('SWISH! +' + POINTS_PER_BASKET, HOOP_X, HOOP_Y - 35 );
+    celebrationFrames = celebrationFrames - 1;
+  }
+
+  // Score, time, misses
+  ctx.fillStyle = 'black';
+  ctx.font = '24px Comic Sans MS, cursive';
+  ctx.textAlign = 'left';
+  ctx.fillText('Misses: ' + misses, 15, 50);
+  ctx.textAlign = 'right';
+  ctx.fillText('Score: ' + score, 385, 50);
+  ctx.textAlign = 'center';
+  ctx.fillText('⏱ ' + formatTime(timeLeft), 200, 50);
+}
+
+function loop() {
+  moveBall();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ---------- Menu ----------
+
+let timerId;
+
+function showMenu(message) {
+  menu.innerHTML = '<h1>' + message + '</h1><p>Pick your time:</p>';
+  TIME_CHOICES.forEach(function (seconds) {
+    const b = document.createElement('button');
+    b.textContent = formatTime(seconds);
+    b.onclick = function () { startGame(seconds); };
+    menu.appendChild(b);
+  });
+  menu.style.display = 'flex';
+}
+
+// ---------- Flicking the ball (mouse or finger) ----------
+
+function pointerPosition(e) {
+  const box = canvas.getBoundingClientRect();
+  const scale = canvas.width / box.width;
+  return { x: (e.clientX - box.left) * scale, y: (e.clientY - box.top) * scale };
+}
+
+canvas.addEventListener('pointerdown', function (e) {
+  if (!playing || flying) return;
+  dragStart = pointerPosition(e);
+});
+
+canvas.addEventListener('pointerup', function (e) {
+  if (!dragStart) return;
+  const end = pointerPosition(e);
+  flickBall(end.x - dragStart.x, end.y - dragStart.y);
+  dragStart = null;
+});
+
+// ---------- Go! ----------
+showMenu("Grant's Basketball 🏀");
+loop();
+</script>
+</body>
+</html>
