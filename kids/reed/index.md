@@ -96,5 +96,9 @@ noFooter: true
       <span class="icon">&#x1F522;</span>
       Counting Game
     </a>
+    <a href="/kids/reed/cops-and-wobbles/" class="game-card">
+      <span class="icon">&#x1F693;</span>
+      Cops &amp; Wobbles
+    </a>
   </div>
 </div>

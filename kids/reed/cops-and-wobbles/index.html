@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reed's Cops &amp; Wobbles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --paper:#4e5f2e;
+    --paper-deep:#3e4d24;
+    --cop:#ff2e7e;
+    --robber:#3fdcf2;
+    --loot:#b96cf0;
+    --gold:#ffe24b;
+    --ink:#f4ffe0;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:var(--paper-deep);
+    color:var(--ink);
+    font-family:'Gaegu','Comic Sans MS',system-ui,sans-serif;
+    overflow:hidden;
+    -webkit-user-select:none;user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  #game{position:relative;width:100%;height:100%;overflow:hidden;background:var(--paper)}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
+
+  .hud{position:absolute;top:0;left:0;right:0;padding:10px 14px;display:flex;align-items:flex-start;justify-content:space-between;pointer-events:none;font-size:26px;line-height:1}
+  .score{color:var(--gold);text-shadow:0 0 10px rgba(255,226,75,.5)}
+  .score small{display:block;font-size:16px;color:#cfe08f;text-shadow:none}
+  .hearts{font-size:22px;letter-spacing:2px}
+  .hearts span{opacity:.22;transition:opacity .2s}
+  .hearts span.on{opacity:1}
+
+  .task{position:absolute;left:50%;top:8px;transform:translateX(-50%);text-align:center;pointer-events:none}
+  .task .say{font-size:20px;color:#dff0a8}
+  .task .big{font-size:52px;line-height:.9;color:#fff;text-shadow:0 0 14px var(--robber),0 0 26px var(--robber)}
+
+  .back-link{position:absolute;left:12px;bottom:12px;color:var(--ink);text-decoration:none;
+    font-size:22px;opacity:.7;z-index:20;transition:opacity .2s}
+  .back-link:hover{opacity:1}
+
+  .sound{position:absolute;right:10px;bottom:10px;width:46px;height:46px;border-radius:50%;
+    background:rgba(0,0,0,.25);border:3px solid rgba(244,255,224,.45);color:var(--ink);
+    font-size:20px;display:grid;place-items:center;cursor:pointer}
+  .sound:active{transform:scale(.94)}
+
+  .screen{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;
+    background:rgba(40,52,20,.86);backdrop-filter:blur(2px)}
+  .screen.hide{display:none}
+  .screen h1{margin:0;font-size:clamp(44px,15vw,86px);line-height:.92;color:var(--cop);
+    text-shadow:0 0 18px rgba(255,46,126,.6)}
+  .screen h1 em{font-style:normal;color:var(--robber);text-shadow:0 0 18px rgba(63,220,242,.6)}
+  .screen p{margin:14px auto 0;max-width:22ch;font-size:24px;color:#e6f5bd}
+  .screen .big-score{font-size:64px;color:var(--gold);margin:6px 0 0;line-height:1}
+  .btn{margin-top:26px;font-family:inherit;font-size:30px;padding:12px 34px;border-radius:999px;
+    color:#2d3a16;background:var(--gold);border:4px solid #fff6c2;cursor:pointer;
+    box-shadow:0 6px 0 #c9a600}
+  .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #c9a600}
+  .best{margin-top:10px;font-size:20px;color:#cfe08f}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="game">
+  <canvas id="cv"></canvas>
+
+  <div class="hud">
+    <div class="score" id="score">0<small>points</small></div>
+    <div class="hearts" id="hearts"><span class="on">❤</span><span class="on">❤</span><span class="on">❤</span></div>
+  </div>
+
+  <div class="task" id="task">
+    <div class="say">Grab the letter</div>
+    <div class="big" id="taskLetter">A</div>
+  </div>
+
+  <a href="/kids/reed/" class="back-link">&larr; Back</a>
+  <button class="sound" id="sound" aria-label="Sound on or off">🔊</button>
+
+  <div class="screen" id="start">
+    <div>
+      <h1>Cops<br>&amp; <em>Wobbles</em></h1>
+      <p>Slide your finger to move the cop. Catch Wobbles, grab the right letter, dodge the bombs.</p>
+      <button class="btn" id="playBtn">Play</button>
+      <div class="best" id="bestStart"></div>
+    </div>
+  </div>
+
+  <div class="screen hide" id="over">
+    <div>
+      <h1 id="overTitle">Nice job!</h1>
+      <div class="big-score" id="finalScore">0</div>
+      <p id="overMsg">Wobbles got away this time.</p>
+      <button class="btn" id="againBtn">Play again</button>
+      <div class="best" id="bestOver"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+  const scoreEl=document.getElementById('score'), heartsEl=document.getElementById('hearts');
+  const taskEl=document.getElementById('task'), taskLetter=document.getElementById('taskLetter');
+  const startScreen=document.getElementById('start'), overScreen=document.getElementById('over');
+  const finalScore=document.getElementById('finalScore'), overMsg=document.getElementById('overMsg');
+  const overTitle=document.getElementById('overTitle');
+  const bestStart=document.getElementById('bestStart'), bestOver=document.getElementById('bestOver');
+  const soundBtn=document.getElementById('sound');
+
+  let W=0,H=0;
+  function resize(){
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    W=cv.clientWidth; H=cv.clientHeight;
+    cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    layoutCity();
+  }
+  window.addEventListener('resize',resize);
+
+  /* ---------- storage ---------- */
+  let best=0;
+  try{ const v=localStorage.getItem('cw_best'); if(v) best=parseInt(v,10)||0; }catch(e){}
+  function saveBest(){ try{ localStorage.setItem('cw_best',String(best)); }catch(e){} }
+  function bestText(){ return best>0 ? 'Best score: '+best : ''; }
+  bestStart.textContent=bestText();
+
+  /* ---------- sound ---------- */
+  let soundOn=true, actx=null;
+  soundBtn.addEventListener('click',()=>{ soundOn=!soundOn; soundBtn.textContent=soundOn?'🔊':'🔇'; });
+  function beep(freq,dur,type,vol){
+    if(!soundOn) return;
+    try{
+      if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+      const o=actx.createOscillator(), g=actx.createGain();
+      o.type=type||'sine'; o.frequency.value=freq;
+      g.gain.setValueAtTime(vol||0.14,actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur);
+      o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+dur);
+    }catch(e){}
+  }
+  function chirp(){ beep(880,.12,'triangle'); setTimeout(()=>beep(1320,.16,'triangle'),90); }
+  function buzz(){ beep(120,.3,'sawtooth',.12); }
+  function siren(){ beep(660,.15,'square',.1); setTimeout(()=>beep(990,.2,'square',.1),140); }
+  function cue(){ beep(1046,.1,'triangle',.1); setTimeout(()=>beep(1568,.14,'triangle',.1),110); }
+
+  /* ---------- world ---------- */
+  const ALPHA='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const NEON=['#ff2e7e','#3fdcf2','#b96cf0','#ffe24b','#7bf05a','#ff8a3d'];
+  let city=[], roadY=0;
+
+  function layoutCity(){
+    roadY=H*0.58;
+    city=[];
+    const n=Math.max(4,Math.round(W/95));
+    for(let i=0;i<n;i++){
+      const w=38+Math.random()*34;
+      const h=90+Math.random()*130;
+      city.push({
+        x:(i+0.5)*(W/n)+(Math.random()*16-8),
+        w:w, h:h,
+        color:NEON[i%NEON.length],
+        lean:(Math.random()*0.10-0.05),
+        rungs:Math.max(3,Math.round(h/34))
+      });
+    }
+  }
+
+  const cop={x:0,y:0,tx:0,ty:0,r:30,safe:0};
+  const robber={x:0,y:0,vx:0,vy:0,r:28,speed:74,wx:0,wy:0,stun:0};
+  let letters=[], bombs=[], sparks=[], toasts=[];
+  let target='A', score=0, lives=3, running=false, shake=0, tPrev=0, time=0, caught=0;
+
+  function rand(a,b){ return a+Math.random()*(b-a); }
+  function dist(ax,ay,bx,by){ const dx=ax-bx, dy=ay-by; return Math.hypot(dx,dy); }
+  function playArea(){ return {x0:34, x1:W-34, y0:118, y1:H-40}; }
+
+  function newWaypoint(){
+    const a=playArea();
+    robber.wx=rand(a.x0,a.x1); robber.wy=rand(a.y0,a.y1);
+  }
+
+  function spawnLetters(){
+    letters=[];
+    const a=playArea();
+    const pool=[]; while(pool.length<4){ const c=ALPHA[Math.floor(Math.random()*26)]; if(!pool.includes(c)) pool.push(c); }
+    target=pool[Math.floor(Math.random()*pool.length)];
+    taskLetter.textContent=target;
+    pool.forEach((c,i)=>{
+      letters.push({
+        c:c,
+        x:rand(a.x0+20,a.x1-20),
+        y:rand(a.y0+20,a.y1-20),
+        vx:rand(-26,26), vy:rand(-22,22),
+        color:NEON[(i+1)%NEON.length],
+        pop:0
+      });
+    });
+    cue();
+  }
+
+  function spawnBomb(){
+    const a=playArea();
+    const side=Math.floor(Math.random()*4);
+    let x,y;
+    if(side===0){x=a.x0;y=rand(a.y0,a.y1);} else if(side===1){x=a.x1;y=rand(a.y0,a.y1);}
+    else if(side===2){x=rand(a.x0,a.x1);y=a.y0;} else {x=rand(a.x0,a.x1);y=a.y1;}
+    bombs.push({x:x,y:y,r:20,life:9,fuse:0});
+  }
+
+  function burst(x,y,color,n){
+    for(let i=0;i<(n||14);i++){
+      const ang=Math.random()*Math.PI*2, sp=rand(50,190);
+      sparks.push({x:x,y:y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,life:rand(.4,.9),color:color});
+    }
+  }
+  function toast(text,x,y,color){ toasts.push({text:text,x:x,y:y,life:1.1,color:color||'#fff'}); }
+
+  function setHearts(){
+    [...heartsEl.children].forEach((h,i)=>h.classList.toggle('on',i<lives));
+  }
+
+  function reset(){
+    score=0; lives=3; caught=0; bombs=[]; sparks=[]; toasts=[]; shake=0;
+    robber.speed=74; robber.stun=0;
+    cop.x=W*0.3; cop.y=H*0.78; cop.tx=cop.x; cop.ty=cop.y; cop.safe=1.2;
+    robber.x=W*0.75; robber.y=H*0.35; newWaypoint();
+    spawnLetters();
+    scoreEl.firstChild.nodeValue='0';
+    setHearts();
+  }
+
+  function gameOver(){
+    running=false;
+    finalScore.textContent=score;
+    if(score>best){ best=score; saveBest(); overTitle.textContent='New record!'; overMsg.textContent='Nobody has ever caught Wobbles like that.'; }
+    else { overTitle.textContent='Nice job!'; overMsg.textContent='Wobbles ran off. Chase him again?'; }
+    bestOver.textContent=bestText();
+    bestStart.textContent=bestText();
+    overScreen.classList.remove('hide');
+  }
+
+  /* ---------- input ---------- */
+  function pointer(e){
+    const r=cv.getBoundingClientRect();
+    const p=e.touches?e.touches[0]:e;
+    cop.tx=p.clientX-r.left; cop.ty=p.clientY-r.top;
+  }
+  cv.addEventListener('pointerdown',e=>{e.preventDefault();pointer(e);cv.setPointerCapture(e.pointerId);},{passive:false});
+  cv.addEventListener('pointermove',e=>{e.preventDefault();if(e.pressure>0||e.buttons||e.pointerType==='touch')pointer(e);},{passive:false});
+  cv.addEventListener('pointerup',e=>{e.preventDefault();},{passive:false});
+  window.addEventListener('keydown',e=>{
+    const step=46, a=playArea();
+    if(e.key==='ArrowLeft') cop.tx=Math.max(a.x0,cop.tx-step);
+    else if(e.key==='ArrowRight') cop.tx=Math.min(a.x1,cop.tx+step);
+    else if(e.key==='ArrowUp') cop.ty=Math.max(a.y0-70,cop.ty-step);
+    else if(e.key==='ArrowDown') cop.ty=Math.min(a.y1,cop.ty+step);
+  });
+
+  /* ---------- update ---------- */
+  function update(dt){
+    time+=dt;
+    const a=playArea();
+    cop.safe=Math.max(0,cop.safe-dt);
+
+    // cop glides toward finger
+    const dx=cop.tx-cop.x, dy=cop.ty-cop.y, d=Math.hypot(dx,dy);
+    if(d>1){
+      const sp=Math.min(d, 420*dt);
+      cop.x+=dx/d*sp; cop.y+=dy/d*sp;
+    }
+    cop.x=Math.max(a.x0,Math.min(a.x1,cop.x));
+    cop.y=Math.max(a.y0-70,Math.min(a.y1,cop.y));
+
+    // robber: wander, flee when cop is close
+    robber.stun=Math.max(0,robber.stun-dt);
+    if(robber.stun<=0){
+      let ax,ay;
+      const dc=dist(robber.x,robber.y,cop.x,cop.y);
+      if(dc<160){
+        ax=robber.x-cop.x; ay=robber.y-cop.y;
+        const m=Math.hypot(ax,ay)||1; ax/=m; ay/=m;
+      }else{
+        ax=robber.wx-robber.x; ay=robber.wy-robber.y;
+        const m=Math.hypot(ax,ay)||1;
+        if(m<26) newWaypoint();
+        ax/=m; ay/=m;
+      }
+      const sp=robber.speed*(dc<160?1.35:1);
+      robber.vx+=(ax*sp-robber.vx)*Math.min(1,dt*4);
+      robber.vy+=(ay*sp-robber.vy)*Math.min(1,dt*4);
+      robber.x+=robber.vx*dt; robber.y+=robber.vy*dt;
+      if(robber.x<a.x0){robber.x=a.x0;robber.vx*=-1;newWaypoint();}
+      if(robber.x>a.x1){robber.x=a.x1;robber.vx*=-1;newWaypoint();}
+      if(robber.y<a.y0){robber.y=a.y0;robber.vy*=-1;newWaypoint();}
+      if(robber.y>a.y1){robber.y=a.y1;robber.vy*=-1;newWaypoint();}
+    }
+
+    // catch the robber
+    if(robber.stun<=0 && dist(cop.x,cop.y,robber.x,robber.y)<cop.r+robber.r-10){
+      score+=10; caught++;
+      burst(robber.x,robber.y,'#3fdcf2',22);
+      toast('Got Wobbles! +10',robber.x,robber.y-52,'#3fdcf2');
+      siren();
+      robber.stun=0.6;
+      robber.x=rand(a.x0,a.x1); robber.y=rand(a.y0,a.y1);
+      while(dist(robber.x,robber.y,cop.x,cop.y)<220){ robber.x=rand(a.x0,a.x1); robber.y=rand(a.y0,a.y1); }
+      robber.speed=Math.min(150,robber.speed+9);
+      newWaypoint();
+      scoreEl.firstChild.nodeValue=String(score);
+    }
+
+    // letters float
+    letters.forEach(L=>{
+      L.pop=Math.max(0,L.pop-dt*3);
+      L.x+=L.vx*dt; L.y+=L.vy*dt;
+      if(L.x<a.x0||L.x>a.x1){L.vx*=-1;L.x=Math.max(a.x0,Math.min(a.x1,L.x));}
+      if(L.y<a.y0||L.y>a.y1){L.vy*=-1;L.y=Math.max(a.y0,Math.min(a.y1,L.y));}
+    });
+
+    for(let i=letters.length-1;i>=0;i--){
+      const L=letters[i];
+      if(dist(cop.x,cop.y,L.x,L.y)<cop.r+22){
+        if(L.c===target){
+          score+=5;
+          scoreEl.firstChild.nodeValue=String(score);
+          burst(L.x,L.y,L.color,18);
+          toast(target+'! +5',L.x,L.y-46,'#ffe24b');
+          chirp();
+          spawnLetters();
+          if(score>0 && score%25===0) spawnBomb();
+          break;
+        }else{
+          buzz(); shake=Math.max(shake,7);
+          toast('Not '+L.c,L.x,L.y-44,'#ff8a3d');
+          spawnBomb();
+          L.x=rand(a.x0,a.x1); L.y=rand(a.y0,a.y1);
+          while(dist(L.x,L.y,cop.x,cop.y)<150){ L.x=rand(a.x0,a.x1); L.y=rand(a.y0,a.y1); }
+        }
+      }
+    }
+
+    // bombs drift toward the cop
+    for(let i=bombs.length-1;i>=0;i--){
+      const b=bombs[i];
+      b.life-=dt; b.fuse+=dt;
+      const bx=cop.x-b.x, by=cop.y-b.y, bm=Math.hypot(bx,by)||1;
+      b.x+=bx/bm*58*dt; b.y+=by/bm*58*dt;
+      if(b.life<=0){ burst(b.x,b.y,'#ff8a3d',10); bombs.splice(i,1); continue; }
+      if(cop.safe<=0 && dist(cop.x,cop.y,b.x,b.y)<cop.r+b.r-6){
+        bombs.splice(i,1);
+        burst(cop.x,cop.y,'#ff8a3d',26);
+        lives--; setHearts(); shake=16; cop.safe=1.6;
+        beep(90,.45,'sawtooth',.16);
+        toast('Ouch!',cop.x,cop.y-60,'#ff8a3d');
+        if(lives<=0){ gameOver(); return; }
+      }
+    }
+
+    // particles
+    for(let i=sparks.length-1;i>=0;i--){
+      const s=sparks[i];
+      s.life-=dt; s.x+=s.vx*dt; s.y+=s.vy*dt; s.vy+=220*dt;
+      if(s.life<=0) sparks.splice(i,1);
+    }
+    for(let i=toasts.length-1;i>=0;i--){
+      const t=toasts[i]; t.life-=dt; t.y-=34*dt;
+      if(t.life<=0) toasts.splice(i,1);
+    }
+    shake*=Math.pow(0.001,dt);
+  }
+
+  /* ---------- drawing ---------- */
+  function glitter(x,y,spread,n,seed){
+    for(let i=0;i<n;i++){
+      const s=Math.sin((seed+i)*12.9898)*43758.5453;
+      const fx=x+((s-Math.floor(s))-.5)*spread;
+      const s2=Math.cos((seed+i)*78.233)*12345.678;
+      const fy=y+((s2-Math.floor(s2))-.5)*spread;
+      ctx.fillStyle=NEON[(i+seed)%NEON.length];
+      ctx.fillRect(fx,fy,2.4,2.4);
+    }
+  }
+
+  function marker(color,width){
+    ctx.strokeStyle=color; ctx.lineWidth=width||5;
+    ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.shadowColor=color; ctx.shadowBlur=10;
+  }
+
+  function drawCity(){
+    ctx.save();
+    city.forEach((b,i)=>{
+      ctx.save();
+      ctx.translate(b.x,roadY);
+      ctx.rotate(b.lean);
+      marker(b.color,4);
+      ctx.globalAlpha=.85;
+      ctx.beginPath();
+      ctx.moveTo(-b.w/2,0); ctx.lineTo(-b.w/2,-b.h);
+      ctx.lineTo(b.w/2,-b.h); ctx.lineTo(b.w/2,0);
+      ctx.stroke();
+      for(let r=1;r<b.rungs;r++){
+        const y=-b.h*(r/b.rungs);
+        ctx.beginPath(); ctx.moveTo(-b.w/2,y); ctx.lineTo(b.w/2,y); ctx.stroke();
+      }
+      ctx.shadowBlur=0;
+      glitter(0,-b.h/2,b.w*0.9,7,i*3);
+      ctx.restore();
+    });
+    // road
+    ctx.save();
+    marker('#ff2e7e',6); ctx.globalAlpha=.9;
+    for(let x=18;x<W-10;x+=64){
+      ctx.beginPath();
+      ctx.moveTo(x,roadY+26+Math.sin(x*0.02)*4);
+      ctx.lineTo(x+34,roadY+24+Math.sin(x*0.02)*4);
+      ctx.stroke();
+    }
+    ctx.restore();
+    ctx.restore();
+  }
+
+  function drawCop(x,y,t,blink){
+    ctx.save(); ctx.translate(x,y);
+    ctx.rotate(Math.sin(t*7)*0.05);
+    if(blink) ctx.globalAlpha=0.45;
+    marker('#ff2e7e',5);
+    const sw=Math.sin(t*9)*5;
+    // legs
+    ctx.beginPath(); ctx.moveTo(-9,20); ctx.lineTo(-13-sw*0.4,36); ctx.moveTo(9,20); ctx.lineTo(13+sw*0.4,36); ctx.stroke();
+    // round body
+    ctx.beginPath(); ctx.ellipse(0,6,21,19,0,0,Math.PI*2); ctx.stroke();
+    // badge
+    ctx.beginPath(); ctx.ellipse(9,8,6.5,6.5,0,0,Math.PI*2); ctx.stroke();
+    // arms
+    ctx.beginPath(); ctx.moveTo(-19,-4); ctx.lineTo(-32,2+sw*0.3); ctx.moveTo(19,-6); ctx.lineTo(31,-13-sw*0.3); ctx.stroke();
+    // neck + head
+    ctx.beginPath(); ctx.moveTo(0,-13); ctx.lineTo(0,-22); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(0,-32,12,11,0,0,Math.PI*2); ctx.stroke();
+    // scribbly hair
+    for(let i=0;i<5;i++){
+      ctx.beginPath();
+      ctx.ellipse(-8+i*4,-45-Math.sin(i*1.4+t*2)*2,9,7,i*0.7,0,Math.PI*2);
+      ctx.stroke();
+    }
+    ctx.shadowBlur=0;
+    glitter(0,-46,30,10,Math.floor(t*6)%7);
+    ctx.restore();
+  }
+
+  function drawRobber(x,y,t){
+    ctx.save(); ctx.translate(x,y);
+    ctx.rotate(Math.sin(t*8)*0.07);
+    marker('#3fdcf2',5);
+    const sw=Math.sin(t*11)*6;
+    // legs
+    ctx.beginPath(); ctx.moveTo(-6,18); ctx.lineTo(-10-sw*0.5,38); ctx.moveTo(6,18); ctx.lineTo(10+sw*0.5,38); ctx.stroke();
+    // body
+    ctx.beginPath(); ctx.moveTo(0,18); ctx.lineTo(0,-6); ctx.stroke();
+    // arms up
+    ctx.beginPath(); ctx.moveTo(-2,-2); ctx.lineTo(-24,-22-sw*0.4); ctx.moveTo(2,-2); ctx.lineTo(24,-20+sw*0.4); ctx.stroke();
+    // head
+    ctx.beginPath(); ctx.ellipse(0,-22,17,16,0,0,Math.PI*2); ctx.stroke();
+    // face
+    ctx.lineWidth=4;
+    ctx.beginPath(); ctx.moveTo(-6,-27); ctx.lineTo(-6,-21); ctx.moveTo(5,-27); ctx.lineTo(5,-21); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,-22,9,0.25*Math.PI,0.75*Math.PI); ctx.stroke();
+    // loot bag
+    marker('#b96cf0',5);
+    ctx.beginPath(); ctx.moveTo(22,-18); ctx.lineTo(30,-2); ctx.lineTo(18,6); ctx.lineTo(10,-8); ctx.closePath(); ctx.stroke();
+    ctx.shadowBlur=0;
+    glitter(20,-6,20,8,Math.floor(t*6)%5);
+    ctx.restore();
+  }
+
+  function drawBomb(b,t){
+    ctx.save(); ctx.translate(b.x,b.y);
+    const puff=1+Math.sin(t*14)*0.06;
+    ctx.scale(puff,puff);
+    marker('#ff8a3d',5);
+    ctx.beginPath(); ctx.arc(0,2,16,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(4,-13); ctx.quadraticCurveTo(16,-24,10,-32); ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle=(Math.floor(t*10)%2)?'#ffe24b':'#ff2e7e';
+    ctx.beginPath(); ctx.arc(10,-33,4,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawLetter(L,t){
+    ctx.save(); ctx.translate(L.x,L.y);
+    const isT=(L.c===target);
+    ctx.rotate(Math.sin(t*2+L.x*0.01)*0.08);
+    if(isT){ const p=1+Math.sin(t*5)*0.07; ctx.scale(p,p); }
+    ctx.font='700 46px Gaegu, sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.lineWidth=7; ctx.lineJoin='round';
+    ctx.strokeStyle='rgba(30,40,14,.55)'; ctx.strokeText(L.c,0,0);
+    ctx.shadowColor=L.color; ctx.shadowBlur=isT?18:8;
+    ctx.fillStyle=L.color; ctx.fillText(L.c,0,0);
+    ctx.shadowBlur=0;
+    if(isT){
+      ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(0,0,32+Math.sin(t*5)*2,0,Math.PI*2); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function render(){
+    ctx.save();
+    if(shake>0.4){ ctx.translate(rand(-shake,shake),rand(-shake,shake)); }
+
+    // paper
+    ctx.fillStyle='#4e5f2e'; ctx.fillRect(-20,-20,W+40,H+40);
+    const g=ctx.createRadialGradient(W*0.5,H*0.35,20,W*0.5,H*0.5,Math.max(W,H)*0.8);
+    g.addColorStop(0,'rgba(255,255,255,.05)'); g.addColorStop(1,'rgba(0,0,0,.28)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    drawCity();
+    letters.forEach(L=>drawLetter(L,time));
+    bombs.forEach(b=>drawBomb(b,time));
+    drawRobber(robber.x,robber.y,time);
+    drawCop(cop.x,cop.y,time,cop.safe>0 && Math.floor(time*12)%2===0);
+
+    sparks.forEach(s=>{
+      ctx.globalAlpha=Math.max(0,s.life);
+      ctx.fillStyle=s.color; ctx.fillRect(s.x,s.y,4,4);
+    });
+    ctx.globalAlpha=1;
+
+    toasts.forEach(t=>{
+      ctx.globalAlpha=Math.max(0,Math.min(1,t.life));
+      ctx.font='700 28px Gaegu, sans-serif'; ctx.textAlign='center';
+      ctx.lineWidth=6; ctx.strokeStyle='rgba(30,40,14,.6)';
+      ctx.strokeText(t.text,t.x,t.y); ctx.fillStyle=t.color; ctx.fillText(t.text,t.x,t.y);
+    });
+    ctx.globalAlpha=1;
+    ctx.restore();
+  }
+
+  function loop(ts){
+    if(!tPrev) tPrev=ts;
+    const dt=Math.min(0.05,(ts-tPrev)/1000); tPrev=ts;
+    if(running) update(dt); else time+=dt;
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  function startGame(){
+    startScreen.classList.add('hide');
+    overScreen.classList.add('hide');
+    resize(); reset();
+    running=true;
+    try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch(e){}
+  }
+  document.getElementById('playBtn').addEventListener('click',startGame);
+  document.getElementById('againBtn').addEventListener('click',startGame);
+
+  resize();
+  cop.x=W*0.3; cop.y=H*0.78; cop.tx=cop.x; cop.ty=cop.y;
+  robber.x=W*0.72; robber.y=H*0.38; newWaypoint();
+  letters=[]; taskEl.style.opacity=.9;
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
